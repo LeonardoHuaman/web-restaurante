@@ -1,0 +1,11 @@
+html.text-sm {
+    font-size: 500px;
+}
+
+html.text-md {
+    font-size: 700px;
+}
+
+html.text-lg {
+    font-size: 1000px;
+}
