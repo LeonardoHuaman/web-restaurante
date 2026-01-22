@@ -1,3 +1,4 @@
+// src/components/menu/ProductCard.tsx
 import { Plus, Minus } from "lucide-react";
 import { Product } from "../../types/Product";
 import { usePartyCartStore } from "../../stores/partyCartStore";
@@ -15,8 +16,21 @@ const ProductCard = ({ product }: Props) => {
         items.find((i) => i.product_id === product.id)?.quantity ?? 0;
 
     return (
-        <div className="bg-white rounded-xl border shadow-sm hover:shadow transition w-full sm:w-72 md:w-80 lg:w-96 mx-auto">
-            <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl">
+        <div
+            className="
+                bg-secondary
+                text-primary
+                rounded-2xl
+                shadow-sm
+                hover:shadow-md
+                transition
+                overflow-hidden
+                flex flex-col
+                min-w-0
+            "
+        >
+            {/* IMAGEN */}
+            <div className="w-full aspect-[4/3] overflow-hidden">
                 <img
                     src={product.image_url}
                     alt={product.name}
@@ -24,19 +38,20 @@ const ProductCard = ({ product }: Props) => {
                 />
             </div>
 
-            <div className="p-4 sm:p-5 flex flex-col gap-2">
-                <h3 className="text-sm sm:text-base md:text-lg font-semibold leading-tight line-clamp-2">
+            {/* CONTENIDO */}
+            <div className="p-4 flex flex-col gap-2 flex-1 bg-secondary">
+                <h3 className="font-semibold leading-tight line-clamp-2">
                     {product.name}
                 </h3>
 
                 {product.description && (
-                    <p className="text-xs sm:text-sm md:text-base text-gray-500 line-clamp-2">
+                    <p className="text-sm text-primary/70 line-clamp-2">
                         {product.description}
                     </p>
                 )}
 
-                <div className="flex justify-between items-center mt-2 sm:mt-3">
-                    <span className="text-sm sm:text-base md:text-lg font-bold text-orange-600">
+                <div className="mt-auto flex items-center justify-between pt-2">
+                    <span className="font-bold text-accent">
                         S/ {product.price}
                     </span>
 
@@ -47,14 +62,19 @@ const ProductCard = ({ product }: Props) => {
                                     partyId &&
                                     decreaseItem(partyId, product.id)
                                 }
-                                className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full border flex items-center justify-center"
+                                className="
+                                    w-8 h-8
+                                    rounded-full
+                                    border border-primary/20
+                                    flex items-center justify-center
+                                "
                             >
-                                <Minus className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                                <Minus className="w-4 h-4" />
                             </button>
                         )}
 
                         {quantity > 0 && (
-                            <span className="text-sm sm:text-base md:text-lg w-6 text-center font-medium">
+                            <span className="w-5 text-center font-medium">
                                 {quantity}
                             </span>
                         )}
@@ -65,11 +85,17 @@ const ProductCard = ({ product }: Props) => {
                                 partyId &&
                                 addItem(partyId, product.id)
                             }
-                            className={`w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full 
-                              ${partyId ? "bg-orange-600" : "bg-gray-300"} 
-                              text-white flex items-center justify-center`}
+                            className={`
+                                w-8 h-8
+                                rounded-full
+                                flex items-center justify-center
+                                ${partyId
+                                    ? "bg-accent text-secondary"
+                                    : "bg-accent/30 text-secondary/60"
+                                }
+                            `}
                         >
-                            <Plus className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                            <Plus className="w-4 h-4" />
                         </button>
                     </div>
                 </div>

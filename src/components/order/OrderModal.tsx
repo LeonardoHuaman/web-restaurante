@@ -1,3 +1,4 @@
+// src/components/order/OrderModal.tsx
 import { usePartyCartStore } from "../../stores/partyCartStore";
 import { usePartyStore } from "../../stores/partyStore";
 import { supabase } from "../../services/supabaseClient";
@@ -14,27 +15,123 @@ const OrderModal = ({ open, onClose }: Props) => {
 
     if (!open) return null;
 
-    const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const total = items.reduce(
+        (sum, i) => sum + i.price * i.quantity,
+        0
+    );
 
     const handleGenerateOrder = async () => {
         if (items.length === 0 || !partyId) return;
 
-        const { error } = await supabase.functions.invoke("generate-order", { body: { party_id: partyId } });
+        const { error } = await supabase.functions.invoke(
+            "generate-order",
+            { body: { party_id: partyId } }
+        );
 
-        if (error) { alert(error.message); return; }
+        if (error) {
+            alert(error.message);
+            return;
+        }
 
         clearCart();
         onClose();
     };
 
     return (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-end">
-            <div className="bg-white w-full rounded-t-2xl max-h-[85vh] overflow-y-auto p-4">
-                <div className="flex justify-between items-center mb-4"><h2 className="text-lg font-bold">Tu pedido</h2><button onClick={onClose}><X /></button></div>
-                <div className="space-y-3">{items.map((item) => <div key={item.product_id} className="flex justify-between text-sm"><span>{item.quantity} × {item.name}</span><span>S/ {item.price * item.quantity}</span></div>)}
+        <div className="fixed inset-0 z-50 flex items-end bg-black/40">
+            <div
+                className="
+                    w-full
+                    max-h-[85vh]
+                    overflow-y-auto
+                    rounded-t-2xl
+                    bg-secondary
+                    text-primary
+                    p-4
+                "
+            >
+                {/* HEADER */}
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-bold">
+                        Tu pedido
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="
+                            p-2 rounded-full
+                            hover:bg-primary/10
+                            transition
+                        "
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
                 </div>
-                <div className="flex justify-between font-bold mt-4"><span>Total</span><span>S/ {total}</span></div>
-                <button onClick={handleGenerateOrder} disabled={items.length === 0} className="mt-5 w-full bg-orange-600 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300">Generar pedido</button>
+
+                {/* ITEMS */}
+                <div className="space-y-3">
+                    {items.map((item) => (
+                        <div
+                            key={item.product_id}
+                            className="
+                                flex items-center gap-3
+                                text-sm
+                            "
+                        >
+                            {/* IMAGEN */}
+                            {item.image_url && (
+                                <img
+                                    src={item.image_url}
+                                    alt={item.name}
+                                    className="
+                                        w-12 h-12
+                                        rounded-lg
+                                        object-cover
+                                        flex-shrink-0
+                                    "
+                                />
+                            )}
+
+                            {/* INFO */}
+                            <div className="flex-1">
+                                <div className="font-medium">
+                                    {item.name}
+                                </div>
+                                <div className="text-primary/60 text-xs">
+                                    {item.quantity} × S/ {item.price}
+                                </div>
+                            </div>
+
+                            {/* SUBTOTAL */}
+                            <div className="font-semibold">
+                                S/ {item.price * item.quantity}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* TOTAL */}
+                <div className="flex justify-between font-bold mt-4">
+                    <span>Total</span>
+                    <span className="text-accent">
+                        S/ {total}
+                    </span>
+                </div>
+
+                {/* BOTÓN */}
+                <button
+                    onClick={handleGenerateOrder}
+                    disabled={items.length === 0}
+                    className={`
+                        mt-5 w-full py-3 rounded-lg
+                        font-semibold transition
+                        ${items.length > 0
+                            ? "bg-accent text-secondary hover:brightness-110"
+                            : "bg-accent/30 text-secondary/60 cursor-not-allowed"
+                        }
+                    `}
+                >
+                    Generar pedido
+                </button>
             </div>
         </div>
     );

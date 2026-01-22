@@ -10,10 +10,11 @@ const MainLayout = () => {
     usePartyCartRealtime(partyId);
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="h-screen flex flex-col overflow-hidden bg-primary">
             <TopBar onToggleSidebar={() => { }} />
 
-            <main className="flex-1 overflow-y-auto pb-20">
+            {/* 🔑 FONDO NEGRO VA AQUÍ */}
+            <main className="flex-1 overflow-y-auto bg-primary">
                 <Outlet />
             </main>
 

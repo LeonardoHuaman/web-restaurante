@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
-import { useThemeStore } from "../../stores/themeStore";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
@@ -35,20 +34,32 @@ const FooterNav = () => {
         onClick,
         badge,
     }: FooterNavBtnProps) => {
-        const { getTextColor } = useThemeStore();
-
         return (
             <button
                 onClick={onClick}
-                className={`relative flex flex-col items-center gap-1 text-sm font-semibold
-          ${isActive ? "text-orange-600" : getTextColor()}
-          hover:text-orange-600 transition-colors`}
+                className={`
+                    relative flex flex-col items-center gap-1
+                    text-sm font-semibold
+                    transition-colors
+                    ${isActive ? "text-accent" : "text-secondary"}
+                    hover:text-accent
+                `}
             >
                 <Icon icon={icon} width={22} />
                 <span>{label}</span>
 
                 {badge !== undefined && badge > 0 && (
-                    <span className="absolute -top-1 right-1 h-4 w-4 bg-orange-600 rounded-full text-xs text-white flex items-center justify-center">
+                    <span
+                        className="
+                            absolute -top-1 right-1
+                            h-4 w-4
+                            rounded-full
+                            bg-accent
+                            text-secondary
+                            text-xs
+                            flex items-center justify-center
+                        "
+                    >
                         {badge}
                     </span>
                 )}
@@ -60,7 +71,6 @@ const FooterNav = () => {
     const navigate = useNavigate();
     const active = selectedNavOptionActive(pathname);
 
-    const { getNavBackgroundColor } = useThemeStore();
     const { t } = useTranslation();
 
     const { items } = usePartyCartStore();
@@ -71,8 +81,12 @@ const FooterNav = () => {
     return (
         <>
             <footer
-                className={`sticky bottom-0 w-full py-3
-        ${getNavBackgroundColor()} z-10 flex justify-around`}
+                className="
+                    sticky bottom-0 w-full py-3 z-10
+                    flex justify-around
+                    bg-primary
+                    border-t border-secondary/20
+                "
             >
                 <FooterNavBtn
                     icon="mdi:silverware-fork-knife"
@@ -97,7 +111,10 @@ const FooterNav = () => {
                 />
             </footer>
 
-            <OrderModal open={orderOpen} onClose={() => setOrderOpen(false)} />
+            <OrderModal
+                open={orderOpen}
+                onClose={() => setOrderOpen(false)}
+            />
         </>
     );
 };

@@ -10,12 +10,24 @@ html.text-lg {
     font-size: 1000px;
 }
 
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+/* ===============================
+   CSS VARIABLES
+=============================== */
 :root {
-    --color-primary: #ffffff;
-    --color-secondary: #130c75;
+    --color-primary: #000000;
+    --color-secondary: #ffffff;
     --color-accent: #e74e39;
 }
 
+/* ===============================
+   BACKGROUNDS
+=============================== */
 .bg-primary {
     background-color: var(--color-primary);
 }
@@ -24,10 +36,33 @@ html.text-lg {
     background-color: var(--color-secondary);
 }
 
+.bg-accent {
+    background-color: var(--color-accent);
+}
+
+/* ===============================
+   TEXT COLORS
+=============================== */
 .text-primary {
     color: var(--color-primary);
 }
 
 .text-secondary {
     color: var(--color-secondary);
+}
+
+.text-accent {
+    color: var(--color-accent);
+}
+
+/* ===============================
+   SCROLLBAR
+=============================== */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

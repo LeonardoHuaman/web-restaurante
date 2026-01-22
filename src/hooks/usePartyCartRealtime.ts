@@ -1,43 +1,18 @@
+// src/hooks/usePartyCartRealtime.ts
 import { useEffect } from "react";
 import { supabase } from "../services/supabaseClient";
 import { usePartyCartStore } from "../stores/partyCartStore";
 
 export const usePartyCartRealtime = (partyId: string | null) => {
-    const { setItems } = usePartyCartStore();
+    const loadCart = usePartyCartStore((s) => s.loadCart);
 
     useEffect(() => {
         if (!partyId) return;
 
-        const fetch = async () => {
-            const { data, error } = await supabase
-                .from("party_cart_items")
-                .select(`
-                    product_id,
-                    quantity,
-                    products (
-                        name,
-                        price
-                    )
-                `)
-                .eq("party_id", partyId);
+        // ✅ CARGA INICIAL (CLAVE)
+        loadCart(partyId);
 
-            if (error) {
-                console.error("❌ Error fetching party cart:", error);
-                return;
-            }
-
-            const mapped = (data || []).map((item: any) => ({
-                product_id: item.product_id,
-                quantity: item.quantity,
-                name: item.products.name,
-                price: item.products.price,
-            }));
-
-            setItems(mapped);
-        };
-
-        fetch();
-
+        // ✅ REALTIME: CUALQUIER CAMBIO RECARGA EL CARRITO
         const channel = supabase
             .channel(`party-cart-${partyId}`)
             .on(
@@ -48,12 +23,14 @@ export const usePartyCartRealtime = (partyId: string | null) => {
                     table: "party_cart_items",
                     filter: `party_id=eq.${partyId}`,
                 },
-                fetch
+                () => {
+                    loadCart(partyId);
+                }
             )
             .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [partyId, setItems]);
+    }, [partyId, loadCart]);
 };

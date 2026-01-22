@@ -1,7 +1,15 @@
+// src/pages/OrderStatusPage.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 import { usePartyStore } from "../stores/partyStore";
-import { X } from "lucide-react";
+import {
+    X,
+    Receipt,
+    Clock,
+    CheckCircle2,
+    Loader2,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Order {
     id: string;
@@ -14,19 +22,28 @@ interface OrderItem {
     product_id: string;
     quantity: number;
     price: number;
-    products: { name: string }[];
+    products: {
+        name: string;
+        image_url?: string;
+    };
 }
 
-const statusLabel = {
-    generado: "Generado",
-    en_curso: "En curso",
-    finalizado: "Entregado",
-};
-
-const statusColor = {
-    generado: "text-green-600",
-    en_curso: "text-orange-600",
-    finalizado: "text-red-600",
+const statusConfig = {
+    generado: {
+        label: "Generado",
+        icon: Clock,
+        color: "text-green-600",
+    },
+    en_curso: {
+        label: "En curso",
+        icon: Loader2,
+        color: "text-orange-600",
+    },
+    finalizado: {
+        label: "Entregado",
+        icon: CheckCircle2,
+        color: "text-red-600",
+    },
 };
 
 const OrderStatusPage = () => {
@@ -43,7 +60,7 @@ const OrderStatusPage = () => {
                 .from("orders")
                 .select("id, status, total, created_at")
                 .eq("party_id", partyId)
-                .order("created_at", { ascending: false });
+                .order("created_at", { ascending: true });
 
             setOrders(data || []);
         };
@@ -74,96 +91,168 @@ const OrderStatusPage = () => {
     const openOrder = async (order: Order) => {
         setSelectedOrder(order);
 
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from("order_items")
-            .select("product_id, quantity, price, products(name)")
+            .select(`
+                product_id,
+                quantity,
+                price,
+                products (
+                    name,
+                    image_url
+                )
+            `)
             .eq("order_id", order.id);
+        console.log("📦 RAW order_items:", data);
+        if (error) {
+            console.error("Error cargando detalle:", error);
+            return;
+        }
+        if (!data) return;
 
-        setOrderItems(data || []);
+        const formattedData: OrderItem[] = data.map((item: any) => ({
+            ...item,
+            products: Array.isArray(item.products) ? item.products[0] : item.products,
+        }));
+
+        setOrderItems(formattedData);
     };
 
     return (
-        <div className="p-5 pb-24">
+        <div className="bg-primary text-secondary px-4 pt-4 pb-24">
             <h1 className="text-2xl font-extrabold mb-6">
                 Estado de tus pedidos
             </h1>
 
-            {orders.length === 0 && (
-                <p className="text-lg">Todavía no hay pedidos 🍽️</p>
-            )}
+            <div className="space-y-5">
+                {orders.map((order, index) => {
+                    const cfg = statusConfig[order.status];
+                    const StatusIcon = cfg.icon;
 
-            <div className="space-y-4">
-                {orders.map((order) => (
-                    <button
-                        key={order.id}
-                        onClick={() => openOrder(order)}
-                        className="w-full text-left border rounded-2xl p-4 shadow-sm active:scale-[0.98]"
-                    >
-                        <div className="flex justify-between items-center">
-                            <span className="text-lg font-semibold">
-                                Pedido
-                            </span>
-                            <span className="text-lg font-bold">
-                                S/ {order.total}
-                            </span>
-                        </div>
+                    return (
+                        <motion.button
+                            key={order.id}
+                            onClick={() => openOrder(order)}
+                            whileTap={{ scale: 0.97 }}
+                            className="
+                                w-full text-left
+                                bg-secondary text-primary
+                                rounded-2xl
+                                p-5 shadow-md
+                                relative overflow-hidden
+                            "
+                        >
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <Receipt className="w-6 h-6" />
+                                    <span className="text-lg font-semibold">
+                                        Pedido {index + 1}
+                                    </span>
+                                </div>
 
-                        <div className="flex justify-between mt-2 text-base">
-                            <span className={`font-semibold ${statusColor[order.status]}`}>
-                                {statusLabel[order.status]}
-                            </span>
-                            <span className="text-gray-500">
-                                {new Date(order.created_at).toLocaleTimeString()}
-                            </span>
-                        </div>
-                    </button>
-                ))}
+                                <span className="text-lg font-bold">
+                                    S/ {order.total}
+                                </span>
+                            </div>
+
+                            <div className="flex justify-between mt-3">
+                                <div className={`flex items-center gap-2 ${cfg.color}`}>
+                                    <StatusIcon className="w-4 h-4" />
+                                    {cfg.label}
+                                </div>
+
+                                <span className="text-primary/60 text-sm">
+                                    {new Date(order.created_at).toLocaleTimeString()}
+                                </span>
+                            </div>
+                        </motion.button>
+                    );
+                })}
             </div>
 
             {orders.length > 0 && (
-                <div className="fixed bottom-16 left-0 right-0 bg-white border-t p-4">
+                <div className="fixed bottom-16 left-0 right-0 bg-primary border-t border-secondary/10 p-4">
                     <div className="flex justify-between text-xl font-extrabold">
                         <span>Total acumulado</span>
-                        <span>S/ {totalParty}</span>
+                        <span className="text-primary">
+                            S/ {totalParty}
+                        </span>
                     </div>
                 </div>
             )}
 
-            {selectedOrder && (
-                <div className="fixed inset-0 bg-black/40 z-50 flex items-end">
-                    <div className="bg-white w-full rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold">
-                                Detalle del pedido
-                            </h2>
-                            <button onClick={() => setSelectedOrder(null)}>
-                                <X />
-                            </button>
-                        </div>
-
-                        <div className="space-y-3">
-                            {orderItems.map((item) => (
-                                <div
-                                    key={item.product_id}
-                                    className="flex justify-between text-base"
+            {/* MODAL DETALLE */}
+            <AnimatePresence>
+                {selectedOrder && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/40 z-50 flex items-end"
+                    >
+                        <motion.div
+                            initial={{ y: 80 }}
+                            animate={{ y: 0 }}
+                            exit={{ y: 80 }}
+                            className="
+                                bg-secondary text-primary
+                                w-full rounded-t-2xl
+                                p-5 max-h-[85vh]
+                                overflow-y-auto
+                            "
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold">
+                                    Detalle del pedido
+                                </h2>
+                                <button
+                                    onClick={() => setSelectedOrder(null)}
+                                    className="p-2 rounded-full hover:bg-primary/10"
                                 >
-                                    <span>
-                                        {item.quantity} × {item.products[0]?.name}
-                                    </span>
-                                    <span>
-                                        S/ {item.quantity * item.price}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+                                    <X />
+                                </button>
+                            </div>
 
-                        <div className="flex justify-between font-bold text-lg mt-5">
-                            <span>Total</span>
-                            <span>S/ {selectedOrder.total}</span>
-                        </div>
-                    </div>
-                </div>
-            )}
+                            <div className="space-y-3">
+                                {orderItems.map((item) => (
+                                    <div
+                                        key={item.product_id}
+                                        className="flex items-center gap-3"
+                                    >
+                                        {item.products.image_url && (
+                                            <img
+                                                src={item.products.image_url}
+                                                alt={item.products.name}
+                                                className="w-12 h-12 rounded-lg object-cover"
+                                            />
+                                        )}
+
+                                        <div className="flex-1">
+                                            <div className="font-medium">
+                                                {item.products.name}
+                                            </div>
+                                            <div className="text-primary/60 text-sm">
+                                                {item.quantity} × S/ {item.price}
+                                            </div>
+                                        </div>
+
+                                        <div className="font-semibold">
+                                            S/ {item.quantity * item.price}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-between font-bold text-lg mt-5">
+                                <span>Total</span>
+                                <span className="text-primary">
+                                    S/ {selectedOrder.total}
+                                </span>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
