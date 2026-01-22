@@ -5,7 +5,6 @@ import { useTableStore } from "../stores/tableStore";
 import { useSessionStore } from "../stores/sessionStore";
 import { usePartyStore } from "../stores/partyStore";
 import { getOrCreateParty } from "../utils/party";
-import { init } from "i18next";
 
 const TWO_HOURS = 2 * 60 * 60 * 1000;
 
@@ -16,42 +15,31 @@ const TableProvider = ({ children }: { children: React.ReactNode }) => {
     const { setTable, setInvalid } = useTableStore();
     const { sessionToken, setSession } = useSessionStore();
     const { setParty } = usePartyStore();
+
     const initialized = useRef(false);
 
     useEffect(() => {
         if (initialized.current) return;
         initialized.current = true;
 
-        init();
-    }, []);
-
-    useEffect(() => {
-        const tableToken = params.get("table");
-
-        if (!tableToken) {
-            setInvalid();
-            navigate("/invalid-table", { replace: true });
-            return;
-        }
-
         const init = async () => {
-            const { data: table, error } = await supabase
-                .from("tables")
-                .select("id, table_number")
-                .eq("qr_token", tableToken)
-                .single();
+            const tableToken = params.get("table");
 
-            if (error || !table) {
-                setInvalid();
-                navigate("/invalid-table", { replace: true });
-                return;
-            }
+            if (tableToken) {
+                const { data: table, error } = await supabase
+                    .from("tables")
+                    .select("id, table_number")
+                    .eq("qr_token", tableToken)
+                    .single<{ id: string; table_number: number }>();
 
-            setTable(table.id, table.table_number);
+                if (error || !table) {
+                    setInvalid();
+                    navigate("/invalid-table", { replace: true });
+                    return;
+                }
 
-            let currentSessionToken: string;
+                setTable(table.id, table.table_number);
 
-            if (!sessionToken) {
                 const { data: session, error: sessionError } = await supabase
                     .from("table_sessions")
                     .insert({
@@ -59,24 +47,57 @@ const TableProvider = ({ children }: { children: React.ReactNode }) => {
                         expires_at: new Date(Date.now() + TWO_HOURS).toISOString(),
                     })
                     .select("session_token")
-                    .single();
+                    .single<{ session_token: string }>();
 
                 if (sessionError || !session) {
+                    setInvalid();
                     navigate("/invalid-table", { replace: true });
                     return;
                 }
 
-                currentSessionToken = session.session_token;
-                setSession(currentSessionToken);
-            } else {
-                currentSessionToken = sessionToken;
+                setSession(session.session_token);
+
+                const partyId = await getOrCreateParty(table.id);
+                setParty(partyId);
+
+                navigate("/", { replace: true });
+                return;
             }
 
-            const partyId = await getOrCreateParty(
-                table.id,
-            );
+            if (sessionToken) {
+                const { data, error } = await supabase
+                    .from("table_sessions")
+                    .select(
+                        `
+            table_id,
+            tables (
+              id,
+              table_number
+            )
+          `
+                    )
+                    .eq("session_token", sessionToken)
+                    .gt("expires_at", new Date().toISOString())
+                    .single<{
+                        table_id: string;
+                        tables: { id: string; table_number: number } | null;
+                    }>();
 
-            setParty(partyId);
+                if (error || !data || !data.tables) {
+                    setInvalid();
+                    navigate("/invalid-table", { replace: true });
+                    return;
+                }
+
+                setTable(data.tables.id, data.tables.table_number);
+
+                const partyId = await getOrCreateParty(data.tables.id);
+                setParty(partyId);
+                return;
+            }
+
+            setInvalid();
+            navigate("/invalid-table", { replace: true });
         };
 
         init();

@@ -1,26 +1,26 @@
+// src/components/layout/TopBar.tsx
 import { useEffect, useState } from "react";
-import { Menu, Glasses } from "lucide-react";
+import {
+    Menu,
+    Glasses,
+    Users,
+    ChevronDown,
+    Globe,
+} from "lucide-react";
+import { motion } from "framer-motion";
 import i18n from "i18next";
-import { initReactI18next, useTranslation } from "react-i18next";
+import { initReactI18next } from "react-i18next";
 import { usePartyStore } from "../../stores/partyStore";
 import { usePartyMembers } from "../../hooks/usePartyMembers";
-import { Users } from "lucide-react";
+import { useThemeStore } from "../../stores/themeStore";
 
 i18n.use(initReactI18next).init({
     resources: {
-        en: { translation: { title: "Home" } },
-        es: { translation: { title: "Inicio" } },
-        pt: { translation: { title: "Início" } },
-        fr: { translation: { title: "Accueil" } },
-        de: { translation: { title: "Startseite" } },
-        it: { translation: { title: "Home" } },
-        ja: { translation: { title: "ホーム" } },
-        ko: { translation: { title: "홈" } },
-        zh: { translation: { title: "首页" } },
-        ru: { translation: { title: "Главная" } },
+        es: { translation: {} },
+        en: { translation: {} },
     },
-    lng: "en",
-    fallbackLng: "en",
+    lng: "es",
+    fallbackLng: "es",
     interpolation: { escapeValue: false },
 });
 
@@ -29,16 +29,23 @@ interface Props {
 }
 
 const TopBar = ({ onToggleSidebar }: Props) => {
-    const { t } = useTranslation();
     const [fontScale, setFontScale] = useState(1);
+    const [langOpen, setLangOpen] = useState(false);
+
     const { partyId } = usePartyStore();
     const members = usePartyMembers(partyId);
+    const { getNavBackgroundColor, getTextColor } = useThemeStore();
 
     useEffect(() => {
         const deviceLang =
             (navigator.languages && navigator.languages[0]) ||
             navigator.language;
-        i18n.changeLanguage(deviceLang.split("-")[0]);
+
+        const lang = deviceLang.startsWith("pt")
+            ? "pt-BR"
+            : deviceLang.split("-")[0];
+
+        i18n.changeLanguage(lang);
     }, []);
 
     useEffect(() => {
@@ -46,52 +53,142 @@ const TopBar = ({ onToggleSidebar }: Props) => {
     }, [fontScale]);
 
     return (
-        <header className="w-full h-14 flex items-center justify-between px-4 shadow-sm bg-white">
-            <button
-                onClick={onToggleSidebar}
-                className="p-2 rounded-lg hover:bg-gray-100"
-            >
-                <Menu />
-            </button>
-
-            <div className="font-bold text-lg">LOGO</div>
-
-            <div className="flex items-center gap-3">
-                <select
-                    value={i18n.language}
-                    onChange={(e) => i18n.changeLanguage(e.target.value)}
-                    className="border rounded-md px-2 py-1 text-sm"
+        <motion.header
+            initial={{ y: -16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className={`
+        sticky top-0 z-30
+        w-full h-16 px-4
+        flex items-center
+        ${getNavBackgroundColor()}
+        ${getTextColor()}
+        backdrop-blur-md
+        border-b border-secondary/10
+      `}
+        >
+            {/* IZQUIERDA: MENÚ + NOMBRE */}
+            <div className="flex items-center gap-3 flex-1">
+                <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={onToggleSidebar}
+                    className="p-2 rounded-xl hover:bg-secondary/10 transition"
                 >
-                    <option value="en">EN</option>
-                    <option value="es">ES</option>
-                    <option value="pt">PT</option>
-                    <option value="fr">FR</option>
-                    <option value="de">DE</option>
-                    <option value="it">IT</option>
-                    <option value="ja">JA</option>
-                    <option value="ko">KO</option>
-                    <option value="zh">ZH</option>
-                    <option value="ru">RU</option>
-                </select>
+                    <Menu style={{ width: "1.4em", height: "1.4em" }} />
+                </motion.button>
 
-                {members > 1 && (
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <Users size={16} />
+                <span className="font-extrabold tracking-wide text-lg">
+                    Restaurante
+                </span>
+            </div>
+
+            {/* CENTRO: LOGO */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+                <span className="font-black tracking-widest text-lg">
+                    LOGO
+                </span>
+            </div>
+
+            {/* DERECHA: ACCIONES */}
+            <div className="flex items-center gap-3 flex-1 justify-end">
+                {/* MIEMBROS */}
+                {members > 0 && (
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="
+              flex items-center gap-2
+              px-3 py-1.5
+              rounded-full
+              bg-secondary/10
+              text-sm font-semibold
+            "
+                    >
+                        <Users style={{ width: "1.2em", height: "1.2em" }} />
                         <span>{members}</span>
-                    </div>
+                    </motion.div>
                 )}
 
-                <button
+                {/* IDIOMAS */}
+                <div className="relative flex items-center gap-1">
+                    {/* 🌍 ICONO PLANETA */}
+                    <button
+                        onClick={() => setLangOpen((v) => !v)}
+                        title="Cambiar idioma"
+                        className="
+              p-2 rounded-full
+              hover:bg-secondary/10
+              transition
+            "
+                    >
+                        <Globe style={{ width: "1.3em", height: "1.3em" }} />
+                    </button>
+
+                    {/* SELECTOR */}
+                    <button
+                        onClick={() => setLangOpen((v) => !v)}
+                        className="
+              flex items-center gap-1
+              px-3 py-1.5
+              rounded-full
+              border border-secondary/20
+              hover:bg-secondary/10
+              text-sm font-medium
+              transition
+            "
+                    >
+                        {i18n.language.toUpperCase()}
+                        <ChevronDown style={{ width: "1em", height: "1em" }} />
+                    </button>
+
+                    {langOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="
+                absolute right-0 top-full mt-2
+                w-28
+                rounded-xl
+                shadow-lg
+                bg-primary
+                border border-secondary/10
+                overflow-hidden
+              "
+                        >
+                            {["es", "en", "pt-BR", "fr", "de", "ja"].map((lng) => (
+                                <button
+                                    key={lng}
+                                    onClick={() => {
+                                        i18n.changeLanguage(lng);
+                                        setLangOpen(false);
+                                    }}
+                                    className="
+                    w-full text-left px-4 py-2
+                    text-sm
+                    hover:bg-secondary/10
+                    transition
+                  "
+                                >
+                                    {lng.toUpperCase()}
+                                </button>
+                            ))}
+                        </motion.div>
+                    )}
+                </div>
+
+                {/* ZOOM */}
+                <motion.button
+                    whileTap={{ scale: 0.9 }}
                     onClick={() =>
                         setFontScale((prev) => (prev >= 1.3 ? 1 : prev + 0.1))
                     }
-                    title="Cambiar tamaño de fuente"
-                    className="p-2 rounded-lg hover:bg-gray-100"
+                    title="Cambiar tamaño"
+                    className="p-2 rounded-full hover:bg-secondary/10 transition"
                 >
-                    <Glasses />
-                </button>
+                    <Glasses style={{ width: "1.3em", height: "1.3em" }} />
+                </motion.button>
             </div>
-        </header>
+        </motion.header>
     );
 };
 

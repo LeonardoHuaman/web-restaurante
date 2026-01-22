@@ -1,3 +1,4 @@
+// src/hooks/usePartyMembers.ts
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 
@@ -5,7 +6,10 @@ export const usePartyMembers = (partyId: string | null) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
-        if (!partyId) return;
+        if (!partyId) {
+            setCount(0);
+            return;
+        }
 
         const fetchCount = async () => {
             const { count } = await supabase
@@ -28,7 +32,7 @@ export const usePartyMembers = (partyId: string | null) => {
                     table: "party_members",
                     filter: `party_id=eq.${partyId}`,
                 },
-                () => fetchCount()
+                fetchCount
             )
             .subscribe();
 

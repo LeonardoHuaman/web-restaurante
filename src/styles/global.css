@@ -9,3 +9,25 @@ html.text-md {
 html.text-lg {
     font-size: 1000px;
 }
+
+:root {
+    --color-primary: #ffffff;
+    --color-secondary: #130c75;
+    --color-accent: #e74e39;
+}
+
+.bg-primary {
+    background-color: var(--color-primary);
+}
+
+.bg-secondary {
+    background-color: var(--color-secondary);
+}
+
+.text-primary {
+    color: var(--color-primary);
+}
+
+.text-secondary {
+    color: var(--color-secondary);
+}

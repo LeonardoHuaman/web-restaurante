@@ -14,26 +14,24 @@ i18n
     .use(LanguageDetector)
     .use(initReactI18next)
     .init({
-        fallbackLng: "en",
-
+        fallbackLng: "es",
+        supportedLngs: ["es", "en", "fr", "pt-BR", "zh-CN", "ja", "de"],
         detection: {
             order: ["localStorage", "navigator"],
-            caches: ["localStorage"]
+            caches: ["localStorage"],
         },
-
         resources: {
             es: { translation: es },
             en: { translation: en },
             fr: { translation: fr },
-            ptBR: { translation: ptBR },
-            zhCN: { translation: zhCN },
+            "pt-BR": { translation: ptBR },
+            "zh-CN": { translation: zhCN },
             ja: { translation: ja },
-            de: { translation: de }
+            de: { translation: de },
         },
-
         interpolation: {
-            escapeValue: false
-        }
+            escapeValue: false,
+        },
     });
 
 export default i18n;

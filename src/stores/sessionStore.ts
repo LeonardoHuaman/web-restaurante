@@ -3,7 +3,6 @@ import { create } from "zustand";
 interface SessionState {
     sessionToken: string | null;
     isReady: boolean;
-
     setSession: (token: string) => void;
     clearSession: () => void;
 }
