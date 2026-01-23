@@ -1,4 +1,3 @@
-// src/components/order/OrderModal.tsx
 import { usePartyCartStore } from "../../stores/partyCartStore";
 import { usePartyStore } from "../../stores/partyStore";
 import { supabase } from "../../services/supabaseClient";
@@ -23,9 +22,21 @@ const OrderModal = ({ open, onClose }: Props) => {
     const handleGenerateOrder = async () => {
         if (items.length === 0 || !partyId) return;
 
+        const sessionToken = localStorage.getItem("session_token");
+
+        if (!sessionToken) {
+            alert("Sesión de mesa no encontrada. Escanee el QR nuevamente.");
+            return;
+        }
+
         const { error } = await supabase.functions.invoke(
             "generate-order",
-            { body: { party_id: partyId } }
+            {
+                body: {
+                    party_id: partyId,
+                    session_token: sessionToken,
+                },
+            }
         );
 
         if (error) {
@@ -36,6 +47,8 @@ const OrderModal = ({ open, onClose }: Props) => {
         clearCart();
         onClose();
     };
+
+
 
     return (
         <div className="fixed inset-0 z-50 flex items-end bg-black/40">
@@ -50,7 +63,6 @@ const OrderModal = ({ open, onClose }: Props) => {
                     p-4
                 "
             >
-                {/* HEADER */}
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold">
                         Tu pedido
@@ -67,7 +79,6 @@ const OrderModal = ({ open, onClose }: Props) => {
                     </button>
                 </div>
 
-                {/* ITEMS */}
                 <div className="space-y-3">
                     {items.map((item) => (
                         <div
@@ -77,7 +88,6 @@ const OrderModal = ({ open, onClose }: Props) => {
                                 text-sm
                             "
                         >
-                            {/* IMAGEN */}
                             {item.image_url && (
                                 <img
                                     src={item.image_url}
@@ -91,7 +101,6 @@ const OrderModal = ({ open, onClose }: Props) => {
                                 />
                             )}
 
-                            {/* INFO */}
                             <div className="flex-1">
                                 <div className="font-medium">
                                     {item.name}
@@ -101,7 +110,6 @@ const OrderModal = ({ open, onClose }: Props) => {
                                 </div>
                             </div>
 
-                            {/* SUBTOTAL */}
                             <div className="font-semibold">
                                 S/ {item.price * item.quantity}
                             </div>
@@ -109,7 +117,6 @@ const OrderModal = ({ open, onClose }: Props) => {
                     ))}
                 </div>
 
-                {/* TOTAL */}
                 <div className="flex justify-between font-bold mt-4">
                     <span>Total</span>
                     <span className="text-accent">
@@ -117,7 +124,6 @@ const OrderModal = ({ open, onClose }: Props) => {
                     </span>
                 </div>
 
-                {/* BOTÓN */}
                 <button
                     onClick={handleGenerateOrder}
                     disabled={items.length === 0}

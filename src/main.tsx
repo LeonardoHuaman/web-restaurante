@@ -11,7 +11,7 @@ import { useThemeStore } from "./stores/themeStore";
 
 useThemeStore
   .getState()
-  .setColors("#0b137e94", "#ffffff", "#e90f0fff");
+  .setColors("#000000ff", "#ffffff", "#e90f0fff");
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

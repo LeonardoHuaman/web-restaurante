@@ -19,7 +19,6 @@ const WaiterLayout = () => {
 
     return (
         <div className="h-screen flex bg-primary text-secondary">
-            {/* SIDEBAR */}
             <aside className="w-64 bg-primary border-r border-secondary/10 p-4">
                 <h1 className="text-xl font-extrabold mb-8">
                     Panel del mozo
@@ -44,7 +43,6 @@ const WaiterLayout = () => {
                 </div>
             </aside>
 
-            {/* CONTENIDO */}
             <main className="flex-1 overflow-y-auto bg-primary">
                 <Outlet />
             </main>
