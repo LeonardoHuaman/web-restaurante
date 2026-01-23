@@ -174,7 +174,7 @@ const OrderStatusPage = () => {
                 <div className="fixed bottom-16 left-0 right-0 bg-primary border-t border-secondary/10 p-4">
                     <div className="flex justify-between text-xl font-extrabold">
                         <span>Total acumulado</span>
-                        <span className="text-primary">
+                        <span className="text-secondary">
                             S/ {totalParty}
                         </span>
                     </div>
