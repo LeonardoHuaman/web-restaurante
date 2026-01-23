@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { useNavigate } from "react-router-dom";
+import {
+    Receipt,
+    Clock,
+    Loader2,
+    CheckCircle2,
+} from "lucide-react";
 
 type OrderStatus = "generado" | "en_curso" | "finalizado";
 
@@ -15,20 +21,25 @@ interface Party {
     orders: Order[];
 }
 
-/* =======================
-   ESTILOS
-======================= */
-
-const CARD_STYLE: Record<OrderStatus, string> = {
-    generado: "border-green-500 bg-green-50",
-    en_curso: "border-orange-500 bg-orange-50",
-    finalizado: "border-gray-400 bg-gray-100",
-};
-
-const BADGE_STYLE: Record<OrderStatus, string> = {
-    generado: "bg-green-200 text-green-800",
-    en_curso: "bg-orange-200 text-orange-800",
-    finalizado: "bg-red-200 text-red-800",
+const STATUS_CONFIG: Record<
+    OrderStatus,
+    { label: string; icon: any; badge: string }
+> = {
+    generado: {
+        label: "Generado",
+        icon: Clock,
+        badge: "bg-green-200 text-green-800",
+    },
+    en_curso: {
+        label: "En curso",
+        icon: Loader2,
+        badge: "bg-orange-200 text-orange-800",
+    },
+    finalizado: {
+        label: "Finalizado",
+        icon: CheckCircle2,
+        badge: "bg-red-200 text-red-800",
+    },
 };
 
 const WaiterMyTablesPage = () => {
@@ -41,7 +52,7 @@ const WaiterMyTablesPage = () => {
         } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from("table_parties")
             .select(`
         id,
@@ -51,23 +62,7 @@ const WaiterMyTablesPage = () => {
             .eq("waiter_id", user.id)
             .eq("is_active", true);
 
-        if (error) {
-            console.error(error);
-            return;
-        }
-
-        /* =======================
-           NORMALIZACIÓN (CLAVE)
-        ======================= */
-
-        const normalized: Party[] =
-            (data as any[])?.map((party) => ({
-                id: party.id,
-                tables: party.tables, // 👈 runtime ya es objeto
-                orders: party.orders ?? [],
-            })) ?? [];
-
-        setParties(normalized);
+        setParties((data as any[]) ?? []);
     };
 
     const finalizeParty = async (
@@ -77,28 +72,48 @@ const WaiterMyTablesPage = () => {
         e.stopPropagation();
 
         const ok = window.confirm(
-            "¿Finalizar esta mesa? Ya no aparecerá en Mis Mesas."
+            "¿Finalizar esta mesa? Se cerrarán todas las sesiones activas."
         );
         if (!ok) return;
 
-        await supabase
-            .from("table_parties")
-            .update({ is_active: false })
-            .eq("id", partyId);
+        const { error } = await supabase.rpc(
+            "finalize_party_and_sessions",
+            { p_party_id: partyId }
+        );
 
-        fetchMyTables();
+        if (!error) fetchMyTables();
     };
 
     useEffect(() => {
         fetchMyTables();
+
+        const channel = supabase
+            .channel("waiter-my-tables-realtime")
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "orders" },
+                fetchMyTables
+            )
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "table_parties" },
+                fetchMyTables
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     return (
-        <>
-            <h1 className="text-2xl font-bold mb-6">Mis mesas</h1>
+        <div className="bg-primary text-secondary min-h-full p-6">
+            <h1 className="text-3xl font-extrabold mb-6">
+                Mis mesas
+            </h1>
 
             {parties.length === 0 && (
-                <p className="text-gray-500">
+                <p className="text-secondary/60">
                     No tienes mesas activas 🍽️
                 </p>
             )}
@@ -110,17 +125,6 @@ const WaiterMyTablesPage = () => {
                         0
                     );
 
-                    const hasEnCurso = party.orders.some(
-                        (o) => o.status === "en_curso"
-                    );
-                    const hasGenerado = party.orders.some(
-                        (o) => o.status === "generado"
-                    );
-
-                    let cardStatus: OrderStatus = "finalizado";
-                    if (hasEnCurso) cardStatus = "en_curso";
-                    else if (hasGenerado) cardStatus = "generado";
-
                     return (
                         <div
                             key={party.id}
@@ -129,44 +133,45 @@ const WaiterMyTablesPage = () => {
                                     state: { from: "mine" },
                                 })
                             }
-                            className={`
-                cursor-pointer
-                border-2 rounded-xl p-4
-                transition-all duration-200
-                hover:scale-[1.02] hover:shadow-lg
-                ${CARD_STYLE[cardStatus]}
-              `}
+                            className="cursor-pointer bg-secondary text-primary rounded-2xl p-5 shadow-md flex flex-col"
                         >
-                            <h2 className="text-xl font-bold mb-1">
-                                Mesa {party.tables.table_number}
-                            </h2>
+                            <div className="flex justify-between items-center mb-2">
+                                <h2 className="text-xl font-bold">
+                                    Mesa {party.tables.table_number}
+                                </h2>
 
-                            <p className="text-sm mb-1">
-                                {party.orders.length} pedidos
-                            </p>
+                                <div className="flex items-center gap-2 text-sm">
+                                    <Receipt className="w-4 h-4 text-primary/60" />
+                                    {party.orders.length}
+                                </div>
+                            </div>
 
-                            <p className="font-semibold mb-3">
+                            <p className="font-semibold text-accent mb-3">
                                 Total: S/ {total}
                             </p>
 
                             <div className="flex flex-wrap gap-2 mb-4">
-                                {party.orders.map((o, i) => (
-                                    <span
-                                        key={i}
-                                        className={`text-xs px-2 py-1 rounded-full ${BADGE_STYLE[o.status]}`}
-                                    >
-                                        {o.status === "generado"
-                                            ? "Generado"
-                                            : o.status === "en_curso"
-                                                ? "En curso"
-                                                : "Finalizado"}
-                                    </span>
-                                ))}
+                                {party.orders.map((order, i) => {
+                                    const cfg = STATUS_CONFIG[order.status];
+                                    const Icon = cfg.icon;
+
+                                    return (
+                                        <span
+                                            key={i}
+                                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${cfg.badge}`}
+                                        >
+                                            <Icon className="w-3 h-3" />
+                                            {cfg.label}
+                                        </span>
+                                    );
+                                })}
                             </div>
 
                             <button
-                                onClick={(e) => finalizeParty(e, party.id)}
-                                className="w-full bg-red-600 text-white py-2 rounded-lg text-sm hover:bg-red-700"
+                                onClick={(e) =>
+                                    finalizeParty(e, party.id)
+                                }
+                                className="mt-auto w-full py-2 rounded-lg text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition"
                             >
                                 Finalizar mesa
                             </button>
@@ -174,7 +179,7 @@ const WaiterMyTablesPage = () => {
                     );
                 })}
             </div>
-        </>
+        </div>
     );
 };
 

@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { useNavigate } from "react-router-dom";
-
-/* =======================
-   TIPOS REALES
-======================= */
+import { Utensils, Receipt, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Party {
     id: string;
@@ -24,19 +22,16 @@ const WaiterTablesPage = () => {
         const { data, error } = await supabase
             .from("table_parties")
             .select(`
-      id,
-      tables(table_number),
-      orders(total)
-    `)
+        id,
+        tables(table_number),
+        orders(total)
+      `)
             .eq("is_active", true)
             .is("waiter_id", null);
 
-        if (error) {
-            console.error("Error cargando mesas:", error);
-            return;
-        }
+        if (error) return;
 
-        const normalized: Party[] =
+        const normalized =
             (data as any[])?.map((party) => ({
                 id: party.id,
                 tables: party.tables ?? null,
@@ -46,9 +41,10 @@ const WaiterTablesPage = () => {
         setParties(normalized);
     };
 
-
     const takeParty = async (partyId: string) => {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return;
 
         await supabase
@@ -69,48 +65,85 @@ const WaiterTablesPage = () => {
 
     useEffect(() => {
         fetchParties();
+
+        const channel = supabase
+            .channel("waiter-tables-realtime")
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "orders" },
+                fetchParties
+            )
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "table_parties" },
+                fetchParties
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     return (
-        <>
-            <h1 className="text-2xl font-bold mb-6">
+        <div className="min-h-screen bg-primary text-secondary p-6">
+            <h1 className="text-3xl font-extrabold mb-8">
                 Mesas disponibles
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {parties
-                    .filter((party) => party.tables !== null)
-                    .map((party) => {
+                    .filter((p) => p.tables !== null)
+                    .map((party, i) => {
                         const total = party.orders.reduce(
                             (s, o) => s + o.total,
                             0
                         );
 
                         return (
-                            <div
+                            <motion.div
                                 key={party.id}
-                                className="bg-white p-4 rounded-xl shadow"
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                className="bg-secondary text-primary rounded-2xl p-5 shadow-md flex flex-col"
                             >
-                                <h2 className="text-xl font-bold">
-                                    Mesa {party.tables!.table_number}
-                                </h2>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-3 rounded-xl bg-accent/20 text-accent">
+                                        <Utensils />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold">
+                                            Mesa {party.tables!.table_number}
+                                        </h2>
+                                        <p className="text-sm text-primary/60">
+                                            Disponible
+                                        </p>
+                                    </div>
+                                </div>
 
-                                <p>{party.orders.length} pedidos</p>
-                                <p className="font-semibold">
-                                    Total: S/ {total}
-                                </p>
+                                <div className="flex justify-between items-center mb-6">
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <Receipt className="w-4 h-4" />
+                                        {party.orders.length} pedidos
+                                    </div>
+                                    <span className="font-semibold text-accent">
+                                        S/ {total}
+                                    </span>
+                                </div>
 
                                 <button
                                     onClick={() => takeParty(party.id)}
-                                    className="mt-4 w-full bg-orange-600 text-white py-2 rounded-lg"
+                                    className="mt-auto w-full py-3 rounded-xl bg-accent text-secondary font-semibold flex items-center justify-center gap-2 hover:brightness-110 transition"
                                 >
                                     Tomar mesa
+                                    <ArrowRight className="w-4 h-4" />
                                 </button>
-                            </div>
+                            </motion.div>
                         );
                     })}
             </div>
-        </>
+        </div>
     );
 };
 

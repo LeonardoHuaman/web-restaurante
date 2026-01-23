@@ -8,43 +8,44 @@ const WaiterLayout = () => {
     const isActive = (path: string, exact = false) => {
         if (exact) {
             return location.pathname === path
-                ? "bg-white text-black"
-                : "text-gray-300";
+                ? "bg-secondary text-primary"
+                : "text-secondary/70";
         }
 
         return location.pathname.startsWith(path)
-            ? "bg-white text-black"
-            : "text-gray-300";
+            ? "bg-secondary text-primary"
+            : "text-secondary/70";
     };
 
     return (
-        <div className="min-h-screen flex bg-gray-100">
-            <aside className="w-64 bg-black p-4 space-y-4">
-                <h1 className="text-white text-xl font-bold mb-6">
+        <div className="h-screen flex bg-primary text-secondary">
+            {/* SIDEBAR */}
+            <aside className="w-64 bg-primary border-r border-secondary/10 p-4">
+                <h1 className="text-xl font-extrabold mb-8">
                     Panel del mozo
                 </h1>
 
-                <button
-                    onClick={() => navigate("/waiter")}
-                    className={`flex gap-3 p-3 rounded-lg w-full ${isActive(
-                        "/waiter",
-                        true
-                    )}`}
-                >
-                    <Home size={20} /> Mesas disponibles
-                </button>
+                <div className="space-y-2">
+                    <button
+                        onClick={() => navigate("/waiter")}
+                        className={`w-full flex gap-3 items-center px-4 py-3 rounded-xl transition hover:bg-secondary/10 ${isActive("/waiter", true)}`}
+                    >
+                        <Home size={20} />
+                        Mesas disponibles
+                    </button>
 
-                <button
-                    onClick={() => navigate("/waiter/my-tables")}
-                    className={`flex gap-3 p-3 rounded-lg w-full ${isActive(
-                        "/waiter/my-tables"
-                    )}`}
-                >
-                    <Utensils size={20} /> Mis mesas
-                </button>
+                    <button
+                        onClick={() => navigate("/waiter/my-tables")}
+                        className={`w-full flex gap-3 items-center px-4 py-3 rounded-xl transition hover:bg-secondary/10 ${isActive("/waiter/my-tables")}`}
+                    >
+                        <Utensils size={20} />
+                        Mis mesas
+                    </button>
+                </div>
             </aside>
 
-            <main className="flex-1 p-6">
+            {/* CONTENIDO */}
+            <main className="flex-1 overflow-y-auto bg-primary">
                 <Outlet />
             </main>
         </div>
