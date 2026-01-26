@@ -1,13 +1,9 @@
 import { supabase } from "../services/supabaseClient";
-import { useSessionStore } from "../stores/sessionStore";
 
-export const getOrCreateParty = async (tableId: string): Promise<string> => {
-    const sessionToken = useSessionStore.getState().sessionToken;
-
-    if (!sessionToken) {
-        throw new Error("No hay session_token");
-    }
-
+export const getOrCreateParty = async (
+    tableId: string,
+    sessionToken: string
+): Promise<string> => {
     const { data, error } = await supabase.functions.invoke(
         "get-or-create-party",
         {
@@ -18,13 +14,8 @@ export const getOrCreateParty = async (tableId: string): Promise<string> => {
         }
     );
 
-    if (error) {
-        throw new Error(error.message);
-    }
-
-    if (!data?.party_id) {
-        throw new Error("No se pudo obtener party");
-    }
+    if (error) throw error;
+    if (!data?.party_id) throw new Error("No se pudo obtener party");
 
     return data.party_id;
 };

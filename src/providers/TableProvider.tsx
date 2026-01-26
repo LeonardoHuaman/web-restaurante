@@ -25,6 +25,48 @@ const TableProvider = ({ children }: { children: React.ReactNode }) => {
         const init = async () => {
             const tableToken = params.get("table");
 
+            /* ===============================
+               CASO 1: YA TENGO SESSION_TOKEN
+            =============================== */
+            if (sessionToken) {
+                const { data, error } = await supabase
+                    .from("table_sessions")
+                    .select(
+                        `
+            table_id,
+            tables (
+              id,
+              table_number
+            )
+          `
+                    )
+                    .eq("session_token", sessionToken)
+                    .gt("expires_at", new Date().toISOString())
+                    .single<{
+                        table_id: string;
+                        tables: { id: string; table_number: number } | null;
+                    }>();
+
+                if (!error && data?.tables) {
+                    setTable(data.tables.id, data.tables.table_number);
+
+                    const partyId = await getOrCreateParty(
+                        data.tables.id,
+                        sessionToken
+                    );
+                    setParty(partyId);
+
+                    navigate("/", { replace: true });
+                    return;
+                }
+
+                // si la sesión es inválida, la limpiamos
+                setSession(null as any);
+            }
+
+            /* ===============================
+               CASO 2: VIENE DESDE QR (SIN SESSION)
+            =============================== */
             if (tableToken) {
                 const { data: table, error } = await supabase
                     .from("tables")
@@ -57,45 +99,19 @@ const TableProvider = ({ children }: { children: React.ReactNode }) => {
 
                 setSession(session.session_token);
 
-                const partyId = await getOrCreateParty(table.id);
+                const partyId = await getOrCreateParty(
+                    table.id,
+                    session.session_token
+                );
                 setParty(partyId);
 
                 navigate("/", { replace: true });
                 return;
             }
 
-            if (sessionToken) {
-                const { data, error } = await supabase
-                    .from("table_sessions")
-                    .select(
-                        `
-            table_id,
-            tables (
-              id,
-              table_number
-            )
-          `
-                    )
-                    .eq("session_token", sessionToken)
-                    .gt("expires_at", new Date().toISOString())
-                    .single<{
-                        table_id: string;
-                        tables: { id: string; table_number: number } | null;
-                    }>();
-
-                if (error || !data || !data.tables) {
-                    setInvalid();
-                    navigate("/invalid-table", { replace: true });
-                    return;
-                }
-
-                setTable(data.tables.id, data.tables.table_number);
-
-                const partyId = await getOrCreateParty(data.tables.id);
-                setParty(partyId);
-                return;
-            }
-
+            /* ===============================
+               CASO 3: NO HAY NADA
+            =============================== */
             setInvalid();
             navigate("/invalid-table", { replace: true });
         };
