@@ -11,6 +11,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { usePartyStore } from "../../stores/partyStore";
 import { usePartyMembers } from "../../hooks/usePartyMembers";
+import { useRestaurantSettings } from "../../hooks/useRestaurantSettings"; // 👈 NUEVO
 
 i18n.use(initReactI18next).init({
     resources: {
@@ -32,6 +33,8 @@ const TopBar = ({ onToggleSidebar }: Props) => {
 
     const { partyId } = usePartyStore();
     const members = usePartyMembers(partyId);
+
+    const settings = useRestaurantSettings(); // 👈 NUEVO
 
     useEffect(() => {
         const deviceLang =
@@ -74,16 +77,26 @@ const TopBar = ({ onToggleSidebar }: Props) => {
                     <Menu className="w-6 h-6" />
                 </motion.button>
 
+                {/* 👇 NOMBRE DINÁMICO */}
                 <span className="font-extrabold tracking-wide text-lg">
-                    Restaurante
+                    {settings?.name ?? "Restaurante"}
                 </span>
             </div>
 
             {/* CENTRO */}
             <div className="absolute left-1/2 -translate-x-1/2">
-                <span className="font-black tracking-widest text-lg">
-                    LOGO
-                </span>
+                {/* 👇 LOGO DINÁMICO */}
+                {settings?.logo_url ? (
+                    <img
+                        src={settings.logo_url}
+                        alt="Logo restaurante"
+                        className="h-10 max-w-[140px] object-contain"
+                    />
+                ) : (
+                    <span className="font-black tracking-widest text-lg">
+                        LOGO
+                    </span>
+                )}
             </div>
 
             {/* DERECHA */}

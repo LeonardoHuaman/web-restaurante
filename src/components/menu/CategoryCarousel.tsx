@@ -1,6 +1,6 @@
 // src/components/categories/CategoryCarousel.tsx
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { categoryIcons } from "../../constants/categoryIcons";
 import { useTranslation } from "react-i18next";
@@ -14,6 +14,17 @@ interface Props {
 
 const SCROLL_AMOUNT = 260;
 
+/* ===============================
+   ORDEN ESTABLE
+=============================== */
+const orderCategories = (categories: Category[]) => {
+    return [...categories].sort((a, b) => {
+        if (a.name === "chef_recommendation") return -1;
+        if (b.name === "chef_recommendation") return 1;
+        return a.name.localeCompare(b.name);
+    });
+};
+
 const CategoryCarousel = ({
     categories,
     selectedCategoryId,
@@ -26,14 +37,21 @@ const CategoryCarousel = ({
     const [canScrollRight, setCanScrollRight] = useState(false);
 
     /* ===============================
-       DEFAULT: PRIMERA CATEGORÍA (CHEF)
-       👉 visualmente igual, lógicamente correcto
+       CATEGORÍAS ORDENADAS (1 VEZ)
+    =============================== */
+    const orderedCategories = useMemo(
+        () => orderCategories(categories),
+        [categories]
+    );
+
+    /* ===============================
+       DEFAULT: CHEF_RECOMMENDATION
     =============================== */
     useEffect(() => {
-        if (!selectedCategoryId && categories.length > 0) {
-            onSelect(categories[0].id);
+        if (!selectedCategoryId && orderedCategories.length > 0) {
+            onSelect(orderedCategories[0].id);
         }
-    }, [categories, selectedCategoryId, onSelect]);
+    }, [orderedCategories, selectedCategoryId, onSelect]);
 
     const updateScrollState = () => {
         const el = scrollRef.current;
@@ -57,7 +75,7 @@ const CategoryCarousel = ({
             el.removeEventListener("scroll", updateScrollState);
             window.removeEventListener("resize", updateScrollState);
         };
-    }, [categories]);
+    }, [orderedCategories]);
 
     const scrollLeft = () => {
         scrollRef.current?.scrollBy({
@@ -82,27 +100,27 @@ const CategoryCarousel = ({
                         whileTap={{ scale: 0.9 }}
                         onClick={scrollLeft}
                         className="
-                            p-2 rounded-full
-                            bg-secondary text-primary
-                            shadow-md
-                            hover:brightness-110
-                        "
+              p-2 rounded-full
+              bg-secondary text-primary
+              shadow-md
+              hover:brightness-110
+            "
                     >
                         <ChevronLeft size={18} />
                     </motion.button>
                 )}
             </div>
 
-            {/* CAROUSEL (MISMO LOOK) */}
+            {/* CAROUSEL */}
             <div
                 ref={scrollRef}
                 className="
-                    flex-1 flex gap-3
-                    overflow-x-auto no-scrollbar
-                    scroll-smooth
-                "
+          flex-1 flex gap-3
+          overflow-x-auto no-scrollbar
+          scroll-smooth
+        "
             >
-                {categories.map((category) => {
+                {orderedCategories.map((category) => {
                     const isActive = selectedCategoryId === category.id;
                     const Icon = categoryIcons[category.name];
 
@@ -116,18 +134,18 @@ const CategoryCarousel = ({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.25 }}
                             className={`
-                                relative flex items-center gap-2
-                                px-5 py-3
-                                rounded-2xl
-                                whitespace-nowrap
-                                text-sm font-semibold
-                                transition-all
-                                border
-                                ${isActive
+                relative flex items-center gap-2
+                px-5 py-3
+                rounded-2xl
+                whitespace-nowrap
+                text-sm font-semibold
+                transition-all
+                border
+                ${isActive
                                     ? "bg-secondary text-primary border-secondary shadow-xl"
                                     : "bg-primary/20 text-secondary border-secondary/30 hover:bg-primary/30"
                                 }
-                            `}
+              `}
                         >
                             {Icon && (
                                 <Icon
@@ -146,10 +164,10 @@ const CategoryCarousel = ({
                                 <motion.span
                                     layoutId="active-category"
                                     className="
-                                        absolute inset-0
-                                        rounded-2xl
-                                        ring-2 ring-accent/70
-                                    "
+                    absolute inset-0
+                    rounded-2xl
+                    ring-2 ring-accent/70
+                  "
                                 />
                             )}
                         </motion.button>
@@ -164,11 +182,11 @@ const CategoryCarousel = ({
                         whileTap={{ scale: 0.9 }}
                         onClick={scrollRight}
                         className="
-                            p-2 rounded-full
-                            bg-secondary text-primary
-                            shadow-md
-                            hover:brightness-110
-                        "
+              p-2 rounded-full
+              bg-secondary text-primary
+              shadow-md
+              hover:brightness-110
+            "
                     >
                         <ChevronRight size={18} />
                     </motion.button>

@@ -8,11 +8,12 @@ import {
     Pizza,
     LayoutGrid,
     BarChart3,
+    Settings,
 } from "lucide-react";
 
 const AdminLayout = () => {
     return (
-        <div className="flex min-h-screen bg-primary text-secondary">
+        <div className="flex h-screen bg-primary text-secondary">
             {/* SIDEBAR */}
             <Sidebar
                 title="Administrador"
@@ -47,18 +48,23 @@ const AdminLayout = () => {
                         to: "/admin/estadisticas",
                         icon: <BarChart3 />,
                     },
+                    {
+                        label: "Configuración",
+                        to: "/admin/configuracion",
+                        icon: <Settings />,
+                    },
                 ]}
             />
 
             {/* CONTENIDO */}
-            <main className="flex-1 flex flex-col bg-primary text-secondary">
+            <main className="flex-1 flex flex-col overflow-hidden">
                 {/* TOP BAR */}
-                <div className="flex justify-end px-8 py-4 border-b border-secondary/30">
+                <div className="flex justify-end px-8 py-4 border-b border-secondary/30 shrink-0">
                     <LogoutButton />
                 </div>
 
                 {/* PAGE CONTENT */}
-                <div className="flex-1 p-8">
+                <div className="flex-1 overflow-y-auto p-8">
                     <Outlet />
                 </div>
             </main>

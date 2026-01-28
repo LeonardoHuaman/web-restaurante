@@ -19,6 +19,7 @@ import WaiterTablesPage from "../pages/waiter/WaiterTablesPage";
 import WaiterPartyDetailPage from "../pages/waiter/WaiterPartyDetailPage";
 import WaiterMyTablesPage from "../pages/waiter/WaiterMyTablesPage";
 import { useLoadPartyCart } from "../hooks/useLoadPartyCart";
+import RestaurantSettingsPage from "../pages/admin/RestaurantSettingsPage";
 
 const InvalidTable = () => (
   <div className="h-screen flex items-center justify-center bg-primary text-secondary">
@@ -72,6 +73,7 @@ function App() {
           <Route path="productos" element={<AdminProductsPage />} />
           <Route path="mesas" element={<AdminTablesPage />} />
           <Route path="estadisticas" element={<AdminStatsPage />} />
+          <Route path="configuracion" element={<RestaurantSettingsPage />} />
         </Route>
 
         {/* =======================
