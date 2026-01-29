@@ -11,8 +11,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import WaiterLayout from "../layouts/WaiterLayout";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminCreateWaiterPage from "../pages/admin/AdminCreateWaiterPage";
-import AdminCategoriesPage from "../pages/admin/AdminCategoriesPage";
-import AdminProductsPage from "../pages/admin/AdminProductsPage";
+import AdminMenuCMSPage from "../pages/admin/AdminMenuCMSPage";
 import AdminStatsPage from "../pages/admin/AdminStatsPage";
 import AdminTablesPage from "../pages/admin/AdminTablesPage";
 import WaiterTablesPage from "../pages/waiter/WaiterTablesPage";
@@ -69,8 +68,7 @@ function App() {
         >
           <Route index element={<AdminDashboardPage />} />
           <Route path="mozos" element={<AdminCreateWaiterPage />} />
-          <Route path="categorias" element={<AdminCategoriesPage />} />
-          <Route path="productos" element={<AdminProductsPage />} />
+          <Route path="menu" element={<AdminMenuCMSPage />} />
           <Route path="mesas" element={<AdminTablesPage />} />
           <Route path="estadisticas" element={<AdminStatsPage />} />
           <Route path="configuracion" element={<RestaurantSettingsPage />} />

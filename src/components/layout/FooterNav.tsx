@@ -1,114 +1,59 @@
+// src/components/layout/FooterNav.tsx
 import { useLocation, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-
 import { usePartyCartStore } from "../../stores/partyCartStore";
 import OrderModal from "../order/OrderModal";
 
 const FooterNav = () => {
-    const selectedNavOptionActive = (pathname: string) => {
-        if (pathname === "/") {
-            return { menu: true, cart: false, status: false };
-        }
-
-        if (pathname.startsWith("/order-status")) {
-            return { menu: false, cart: false, status: true };
-        }
-
-        return { menu: false, cart: false, status: false };
-    };
-
-    interface FooterNavBtnProps {
-        icon: string;
-        label: string;
-        isActive: boolean;
-        onClick: () => void;
-        badge?: number;
-    }
-
-    const FooterNavBtn = ({
-        icon,
-        label,
-        isActive,
-        onClick,
-        badge,
-    }: FooterNavBtnProps) => {
-        return (
-            <button
-                onClick={onClick}
-                className={`
-                    relative flex flex-col items-center gap-1
-                    text-sm font-semibold
-                    transition-colors
-                    ${isActive ? "text-accent" : "text-secondary"}
-                    hover:text-accent
-                `}
-            >
-                <Icon icon={icon} width={22} />
-                <span>{label}</span>
-
-                {badge !== undefined && badge > 0 && (
-                    <span
-                        className="
-                            absolute -top-1 right-1
-                            h-4 w-4
-                            rounded-full
-                            bg-accent
-                            text-secondary
-                            text-xs
-                            flex items-center justify-center
-                        "
-                    >
-                        {badge}
-                    </span>
-                )}
-            </button>
-        );
-    };
-
     const { pathname } = useLocation();
     const navigate = useNavigate();
-    const active = selectedNavOptionActive(pathname);
-
     const { t } = useTranslation();
 
     const { items } = usePartyCartStore();
-    const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
+    const totalItems = items.reduce((s, i) => s + i.quantity, 0);
 
     const [orderOpen, setOrderOpen] = useState(false);
 
     return (
         <>
-            <footer
-                className="
-                    sticky bottom-0 w-full py-3 z-10
-                    flex justify-around
-                    bg-primary
-                    border-t border-secondary/20
-                "
-            >
-                <FooterNavBtn
-                    icon="mdi:silverware-fork-knife"
-                    label={t("menu")}
-                    isActive={active.menu}
+            <footer className="
+                fixed sm:sticky bottom-0
+                w-full py-3 z-30
+                flex justify-around
+                bg-primary
+                border-t border-secondary/20
+            ">
+                <button
                     onClick={() => navigate("/")}
-                />
+                    className="flex flex-col items-center gap-1 font-semibold text-secondary"
+                >
+                    <Icon icon="mdi:silverware-fork-knife" width={22} />
+                    <span>{t("menu")}</span>
+                </button>
 
-                <FooterNavBtn
-                    icon="mdi:cart"
-                    label={t("order")}
-                    isActive={orderOpen}
-                    badge={totalItems}
+                <button
                     onClick={() => setOrderOpen(true)}
-                />
+                    className="relative flex flex-col items-center gap-1 font-semibold text-secondary"
+                >
+                    <Icon icon="mdi:cart" width={22} />
+                    <span>{t("order")}</span>
 
-                <FooterNavBtn
-                    icon="mdi:clock-outline"
-                    label={t("order-status")}
-                    isActive={active.status}
+                    {totalItems > 0 && (
+                        <span className="absolute -top-1 right-1 h-4 w-4 rounded-full bg-accent text-secondary text-xs flex items-center justify-center">
+                            {totalItems}
+                        </span>
+                    )}
+                </button>
+
+                <button
                     onClick={() => navigate("/order-status")}
-                />
+                    className="flex flex-col items-center gap-1 font-semibold text-secondary"
+                >
+                    <Icon icon="mdi:clock-outline" width={22} />
+                    <span>{t("order-status")}</span>
+                </button>
             </footer>
 
             <OrderModal

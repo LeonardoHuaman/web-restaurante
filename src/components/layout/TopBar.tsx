@@ -1,3 +1,4 @@
+// src/components/layout/TopBar.tsx
 import { useEffect, useState } from "react";
 import {
     Menu,
@@ -11,13 +12,10 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { usePartyStore } from "../../stores/partyStore";
 import { usePartyMembers } from "../../hooks/usePartyMembers";
-import { useRestaurantSettings } from "../../hooks/useRestaurantSettings"; // 👈 NUEVO
+import { useRestaurantSettings } from "../../hooks/useRestaurantSettings";
 
 i18n.use(initReactI18next).init({
-    resources: {
-        es: { translation: {} },
-        en: { translation: {} },
-    },
+    resources: { es: { translation: {} }, en: { translation: {} } },
     lng: "es",
     fallbackLng: "es",
     interpolation: { escapeValue: false },
@@ -27,26 +25,15 @@ interface Props {
     onToggleSidebar: () => void;
 }
 
+const LANGS = ["es", "en", "pt-BR", "fr", "de", "ja"];
+
 const TopBar = ({ onToggleSidebar }: Props) => {
     const [fontScale, setFontScale] = useState(1);
     const [langOpen, setLangOpen] = useState(false);
 
     const { partyId } = usePartyStore();
     const members = usePartyMembers(partyId);
-
-    const settings = useRestaurantSettings(); // 👈 NUEVO
-
-    useEffect(() => {
-        const deviceLang =
-            (navigator.languages && navigator.languages[0]) ||
-            navigator.language;
-
-        const lang = deviceLang.startsWith("pt")
-            ? "pt-BR"
-            : deviceLang.split("-")[0];
-
-        i18n.changeLanguage(lang);
-    }, []);
+    const settings = useRestaurantSettings();
 
     useEffect(() => {
         document.documentElement.style.fontSize = `${fontScale * 100}%`;
@@ -54,43 +41,38 @@ const TopBar = ({ onToggleSidebar }: Props) => {
 
     return (
         <motion.header
-            initial={{ y: -16, opacity: 0 }}
+            initial={{ y: -12, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
             className="
                 sticky top-0 z-30
-                w-full h-16 px-4
+                w-full h-14 sm:h-16
+                px-3 sm:px-4
                 flex items-center
-                bg-primary
-                text-secondary
-                backdrop-blur-md
+                bg-primary text-secondary
                 border-b border-secondary/10
             "
         >
             {/* IZQUIERDA */}
-            <div className="flex items-center gap-3 flex-1">
-                <motion.button
-                    whileTap={{ scale: 0.9 }}
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+                <button
                     onClick={onToggleSidebar}
-                    className="p-2 rounded-xl hover:bg-secondary/10 transition"
+                    className="p-2 rounded-xl hover:bg-secondary/10"
                 >
                     <Menu className="w-6 h-6" />
-                </motion.button>
+                </button>
 
-                {/* 👇 NOMBRE DINÁMICO */}
-                <span className="font-extrabold tracking-wide text-lg">
+                <span className="font-extrabold tracking-wide text-base sm:text-lg truncate">
                     {settings?.name ?? "Restaurante"}
                 </span>
             </div>
 
-            {/* CENTRO */}
-            <div className="absolute left-1/2 -translate-x-1/2">
-                {/* 👇 LOGO DINÁMICO */}
+            {/* CENTRO — SOLO DESKTOP */}
+            <div className="hidden sm:flex absolute left-1/2 -translate-x-1/2">
                 {settings?.logo_url ? (
                     <img
                         src={settings.logo_url}
-                        alt="Logo restaurante"
-                        className="h-10 max-w-[140px] object-contain"
+                        alt="Logo"
+                        className="h-9 max-w-[120px] object-contain"
                     />
                 ) : (
                     <span className="font-black tracking-widest text-lg">
@@ -100,49 +82,34 @@ const TopBar = ({ onToggleSidebar }: Props) => {
             </div>
 
             {/* DERECHA */}
-            <div className="flex items-center gap-3 flex-1 justify-end">
-                {/* MIEMBROS */}
+            <div className="flex items-center gap-2 sm:gap-3 justify-end">
+                {/* MIEMBROS — DESKTOP */}
                 {members > 0 && (
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="
-                            flex items-center gap-2
-                            px-3 py-1.5
-                            rounded-full
-                            bg-secondary/10
-                            text-sm font-semibold
-                        "
-                    >
+                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 text-sm font-semibold">
                         <Users className="w-5 h-5" />
                         <span>{members}</span>
-                    </motion.div>
+                    </div>
                 )}
 
-                {/* IDIOMAS */}
-                <div className="relative flex items-center gap-1">
-                    <button
-                        onClick={() => setLangOpen((v) => !v)}
-                        title="Cambiar idioma"
-                        className="p-2 rounded-full hover:bg-secondary/10 transition"
-                    >
-                        <Globe className="w-5 h-5" />
-                    </button>
-
+                {/* IDIOMAS (SIEMPRE DISPONIBLE) */}
+                <div className="relative">
                     <button
                         onClick={() => setLangOpen((v) => !v)}
                         className="
                             flex items-center gap-1
-                            px-3 py-1.5
+                            p-2 sm:px-3 sm:py-1.5
                             rounded-full
                             border border-secondary/20
                             hover:bg-secondary/10
-                            text-sm font-medium
                             transition
                         "
                     >
-                        {i18n.language.toUpperCase()}
-                        <ChevronDown className="w-4 h-4" />
+                        <Globe className="w-5 h-5" />
+                        {/* TEXTO SOLO DESKTOP */}
+                        <span className="hidden sm:inline text-sm font-medium">
+                            {i18n.language.toUpperCase()}
+                        </span>
+                        <ChevronDown className="hidden sm:inline w-4 h-4" />
                     </button>
 
                     {langOpen && (
@@ -160,7 +127,7 @@ const TopBar = ({ onToggleSidebar }: Props) => {
                                 z-50
                             "
                         >
-                            {["es", "en", "pt-BR", "fr", "de", "ja"].map((lng) => (
+                            {LANGS.map((lng) => (
                                 <button
                                     key={lng}
                                     onClick={() => {
@@ -181,17 +148,15 @@ const TopBar = ({ onToggleSidebar }: Props) => {
                     )}
                 </div>
 
-                {/* ZOOM */}
-                <motion.button
-                    whileTap={{ scale: 0.9 }}
+                {/* ZOOM — SOLO DESKTOP */}
+                <button
                     onClick={() =>
-                        setFontScale((prev) => (prev >= 1.3 ? 1 : prev + 0.1))
+                        setFontScale((p) => (p >= 1.3 ? 1 : p + 0.1))
                     }
-                    title="Cambiar tamaño"
-                    className="p-2 rounded-full hover:bg-secondary/10 transition"
+                    className="hidden sm:flex p-2 rounded-full hover:bg-secondary/10"
                 >
                     <Glasses className="w-5 h-5" />
-                </motion.button>
+                </button>
             </div>
         </motion.header>
     );

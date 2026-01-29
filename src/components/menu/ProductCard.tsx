@@ -16,20 +16,7 @@ const ProductCard = ({ product }: Props) => {
         items.find((i) => i.product_id === product.id)?.quantity ?? 0;
 
     return (
-        <div
-            className="
-                bg-secondary
-                text-primary
-                rounded-2xl
-                shadow-sm
-                hover:shadow-md
-                transition
-                overflow-hidden
-                flex flex-col
-                min-w-0
-            "
-        >
-            {/* IMAGEN */}
+        <div className="bg-secondary text-primary rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col min-w-0">
             <div className="w-full aspect-[4/3] overflow-hidden">
                 <img
                     src={product.image_url}
@@ -38,7 +25,6 @@ const ProductCard = ({ product }: Props) => {
                 />
             </div>
 
-            {/* CONTENIDO */}
             <div className="p-4 flex flex-col gap-2 flex-1 bg-secondary">
                 <h3 className="font-semibold leading-tight line-clamp-2">
                     {product.name}
@@ -62,12 +48,7 @@ const ProductCard = ({ product }: Props) => {
                                     partyId &&
                                     decreaseItem(partyId, product.id)
                                 }
-                                className="
-                                    w-8 h-8
-                                    rounded-full
-                                    border border-primary/20
-                                    flex items-center justify-center
-                                "
+                                className="w-8 h-8 rounded-full border border-primary/20 flex items-center justify-center"
                             >
                                 <Minus className="w-4 h-4" />
                             </button>
@@ -85,15 +66,10 @@ const ProductCard = ({ product }: Props) => {
                                 partyId &&
                                 addItem(partyId, product.id)
                             }
-                            className={`
-                                w-8 h-8
-                                rounded-full
-                                flex items-center justify-center
-                                ${partyId
-                                    ? "bg-accent text-secondary"
-                                    : "bg-accent/30 text-secondary/60"
-                                }
-                            `}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center ${partyId
+                                ? "bg-accent text-secondary"
+                                : "bg-accent/30 text-secondary/60 cursor-not-allowed"
+                                }`}
                         >
                             <Plus className="w-4 h-4" />
                         </button>

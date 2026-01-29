@@ -15,26 +15,15 @@ const MenuPage = () => {
     const [selectedCategoryId, setSelectedCategoryId] =
         useState<string | null>(null);
 
-    /* ===============================
-       CARGAR CATEGORÍAS ACTIVAS
-    =============================== */
     useEffect(() => {
         supabase
             .from("categories")
             .select("*")
             .eq("is_active", true)
-            .then(({ data, error }) => {
-                if (error) {
-                    console.error("Error cargando categorías:", error);
-                    return;
-                }
-                setCategories(data || []);
-            });
+            .order("sort_order")
+            .then(({ data }) => setCategories(data ?? []));
     }, []);
 
-    /* ===============================
-       CARGAR PRODUCTOS POR CATEGORÍA
-    =============================== */
     useEffect(() => {
         if (!selectedCategoryId) return;
 
@@ -46,19 +35,16 @@ const MenuPage = () => {
                     name,
                     description,
                     price,
-                    image_url
+                    image_url,
+                    is_active
                 )
             `)
             .eq("category_id", selectedCategoryId)
-            .then(({ data, error }) => {
-                if (error) {
-                    console.error("Error cargando productos:", error);
-                    return;
-                }
-
-                const mapped =
-                    data?.map((d: any) => d.product).filter(Boolean) || [];
-                setProducts(mapped);
+            .eq("product.is_active", true)
+            .then(({ data }) => {
+                setProducts(
+                    data?.map((r: any) => r.product).filter(Boolean) ?? []
+                );
             });
     }, [selectedCategoryId]);
 
@@ -67,39 +53,20 @@ const MenuPage = () => {
     );
 
     return (
-        <div className="bg-primary px-4 pt-4 pb-6">
-            {/* CATEGORÍAS */}
+        <div className="bg-primary px-3 sm:px-4 pt-4 pb-24 min-h-screen">
             <CategoryCarousel
                 categories={categories}
                 selectedCategoryId={selectedCategoryId}
                 onSelect={setSelectedCategoryId}
             />
 
-            {/* TÍTULO DE CATEGORÍA */}
             {activeCategory && (
-                <h2
-                    className="
-                        text-secondary
-                        text-lg sm:text-xl
-                        font-bold
-                        tracking-wide
-                        mt-6 mb-4
-                    "
-                >
+                <h2 className="text-secondary text-lg font-bold mt-5 mb-3">
                     {t(`categories.${activeCategory.name}`)}
                 </h2>
             )}
 
-            {/* PRODUCTOS */}
-            <div
-                className="
-                    grid gap-4
-                    grid-cols-1
-                    sm:grid-cols-2
-                    md:grid-cols-3
-                    lg:grid-cols-5
-                "
-            >
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 {products.map((product) => (
                     <ProductCard
                         key={product.id}
@@ -107,6 +74,12 @@ const MenuPage = () => {
                     />
                 ))}
             </div>
+
+            {products.length === 0 && selectedCategoryId && (
+                <div className="text-center text-secondary/60 mt-10">
+                    No hay productos disponibles
+                </div>
+            )}
         </div>
     );
 };

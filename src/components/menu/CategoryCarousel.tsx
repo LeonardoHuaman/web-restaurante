@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { categoryIcons } from "../../constants/categoryIcons";
+import * as Icons from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Category } from "../../types/Category";
 
@@ -100,11 +100,11 @@ const CategoryCarousel = ({
                         whileTap={{ scale: 0.9 }}
                         onClick={scrollLeft}
                         className="
-              p-2 rounded-full
-              bg-secondary text-primary
-              shadow-md
-              hover:brightness-110
-            "
+                            p-2 rounded-full
+                            bg-secondary text-primary
+                            shadow-md
+                            hover:brightness-110
+                        "
                     >
                         <ChevronLeft size={18} />
                     </motion.button>
@@ -115,14 +115,20 @@ const CategoryCarousel = ({
             <div
                 ref={scrollRef}
                 className="
-          flex-1 flex gap-3
-          overflow-x-auto no-scrollbar
-          scroll-smooth
-        "
+                    flex-1 flex gap-3
+                    overflow-x-auto no-scrollbar
+                    scroll-smooth
+                "
             >
                 {orderedCategories.map((category) => {
                     const isActive = selectedCategoryId === category.id;
-                    const Icon = categoryIcons[category.name];
+
+                    // 🔑 ICONO DESDE DB
+                    const Icon =
+                        category.icon &&
+                            (Icons as any)[category.icon]
+                            ? (Icons as any)[category.icon]
+                            : null;
 
                     return (
                         <motion.button
@@ -134,18 +140,18 @@ const CategoryCarousel = ({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.25 }}
                             className={`
-                relative flex items-center gap-2
-                px-5 py-3
-                rounded-2xl
-                whitespace-nowrap
-                text-sm font-semibold
-                transition-all
-                border
-                ${isActive
+                                relative flex items-center gap-2
+                                px-5 py-3
+                                rounded-2xl
+                                whitespace-nowrap
+                                text-sm font-semibold
+                                transition-all
+                                border
+                                ${isActive
                                     ? "bg-secondary text-primary border-secondary shadow-xl"
                                     : "bg-primary/20 text-secondary border-secondary/30 hover:bg-primary/30"
                                 }
-              `}
+                            `}
                         >
                             {Icon && (
                                 <Icon
@@ -164,10 +170,10 @@ const CategoryCarousel = ({
                                 <motion.span
                                     layoutId="active-category"
                                     className="
-                    absolute inset-0
-                    rounded-2xl
-                    ring-2 ring-accent/70
-                  "
+                                        absolute inset-0
+                                        rounded-2xl
+                                        ring-2 ring-accent/70
+                                    "
                                 />
                             )}
                         </motion.button>
@@ -182,11 +188,11 @@ const CategoryCarousel = ({
                         whileTap={{ scale: 0.9 }}
                         onClick={scrollRight}
                         className="
-              p-2 rounded-full
-              bg-secondary text-primary
-              shadow-md
-              hover:brightness-110
-            "
+                            p-2 rounded-full
+                            bg-secondary text-primary
+                            shadow-md
+                            hover:brightness-110
+                        "
                     >
                         <ChevronRight size={18} />
                     </motion.button>
