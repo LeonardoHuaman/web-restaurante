@@ -10,9 +10,6 @@ const RestaurantSettingsPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    /* =====================
-       CARGAR CONFIG
-    ===================== */
     useEffect(() => {
         const load = async () => {
             const { data } = await supabase
@@ -30,9 +27,6 @@ const RestaurantSettingsPage = () => {
         load();
     }, []);
 
-    /* =====================
-       GUARDAR NOMBRE (OPCIONAL)
-    ===================== */
     const saveName = async () => {
         if (!id || !name.trim()) return;
 
@@ -45,16 +39,11 @@ const RestaurantSettingsPage = () => {
         setTimeout(() => setSuccess(null), 3000);
     };
 
-
-    /* =====================
-       SUBIR LOGO (PNG ONLY)
-    ===================== */
     const uploadLogo = async (file: File) => {
         setError(null);
 
         if (!id) return;
 
-        // 🔒 VALIDACIÓN PNG
         if (file.type !== "image/png") {
             setError("El logo debe ser un archivo PNG");
             return;
@@ -101,16 +90,11 @@ const RestaurantSettingsPage = () => {
                     {success}
                 </div>
             )}
-            {/* ERROR */}
             {error && (
                 <div className="p-3 rounded-lg bg-red-500/10 text-red-500 text-sm">
                     {error}
                 </div>
             )}
-
-            {/* =====================
-         NOMBRE (INDEPENDIENTE)
-      ===================== */}
             <div className="space-y-2">
                 <label className="text-sm font-medium">
                     Nombre del restaurante
@@ -141,9 +125,6 @@ const RestaurantSettingsPage = () => {
                 </button>
             </div>
 
-            {/* =====================
-         LOGO (PNG ONLY)
-      ===================== */}
             <div className="space-y-3">
                 <label className="text-sm font-medium">
                     Logo del restaurante (PNG)

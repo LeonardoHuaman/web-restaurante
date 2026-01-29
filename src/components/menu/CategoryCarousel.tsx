@@ -36,17 +36,11 @@ const CategoryCarousel = ({
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
-    /* ===============================
-       CATEGORÍAS ORDENADAS (1 VEZ)
-    =============================== */
     const orderedCategories = useMemo(
         () => orderCategories(categories),
         [categories]
     );
 
-    /* ===============================
-       DEFAULT: CHEF_RECOMMENDATION
-    =============================== */
     useEffect(() => {
         if (!selectedCategoryId && orderedCategories.length > 0) {
             onSelect(orderedCategories[0].id);
@@ -93,8 +87,8 @@ const CategoryCarousel = ({
 
     return (
         <div className="w-full flex items-center gap-2 px-2">
-            {/* BOTÓN IZQUIERDO */}
-            <div className="w-10 flex justify-center">
+            {/* BOTÓN IZQUIERDO — SOLO DESKTOP */}
+            <div className="w-10 justify-center hidden md:flex">
                 {canScrollLeft && (
                     <motion.button
                         whileTap={{ scale: 0.9 }}
@@ -118,12 +112,12 @@ const CategoryCarousel = ({
                     flex-1 flex gap-3
                     overflow-x-auto no-scrollbar
                     scroll-smooth
+                    touch-pan-x
                 "
             >
                 {orderedCategories.map((category) => {
                     const isActive = selectedCategoryId === category.id;
 
-                    // 🔑 ICONO DESDE DB
                     const Icon =
                         category.icon &&
                             (Icons as any)[category.icon]
@@ -181,8 +175,8 @@ const CategoryCarousel = ({
                 })}
             </div>
 
-            {/* BOTÓN DERECHO */}
-            <div className="w-10 flex justify-center">
+            {/* BOTÓN DERECHO — SOLO DESKTOP */}
+            <div className="w-10 justify-center hidden md:flex">
                 {canScrollRight && (
                     <motion.button
                         whileTap={{ scale: 0.9 }}

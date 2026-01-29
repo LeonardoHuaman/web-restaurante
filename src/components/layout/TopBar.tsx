@@ -61,12 +61,28 @@ const TopBar = ({ onToggleSidebar }: Props) => {
                     <Menu className="w-6 h-6" />
                 </button>
 
-                <span className="font-extrabold tracking-wide text-base sm:text-lg truncate">
+                {/* LOGO — MOBILE */}
+                <div className="sm:hidden">
+                    {settings?.logo_url ? (
+                        <img
+                            src={settings.logo_url}
+                            alt="Logo"
+                            className="h-7 w-7 object-contain"
+                        />
+                    ) : (
+                        <div className="h-7 w-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white">
+                            🍽️
+                        </div>
+                    )}
+                </div>
+
+                {/* NOMBRE — SOLO DESKTOP */}
+                <span className="hidden sm:block font-extrabold tracking-wide text-lg truncate">
                     {settings?.name ?? "Restaurante"}
                 </span>
             </div>
 
-            {/* CENTRO — SOLO DESKTOP */}
+            {/* CENTRO — LOGO DESKTOP */}
             <div className="hidden sm:flex absolute left-1/2 -translate-x-1/2">
                 {settings?.logo_url ? (
                     <img
@@ -83,15 +99,15 @@ const TopBar = ({ onToggleSidebar }: Props) => {
 
             {/* DERECHA */}
             <div className="flex items-center gap-2 sm:gap-3 justify-end">
-                {/* MIEMBROS — DESKTOP */}
+                {/* MIEMBROS — SIEMPRE */}
                 {members > 0 && (
-                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 text-sm font-semibold">
-                        <Users className="w-5 h-5" />
+                    <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full bg-secondary/10 text-xs sm:text-sm font-semibold">
+                        <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span>{members}</span>
                     </div>
                 )}
 
-                {/* IDIOMAS (SIEMPRE DISPONIBLE) */}
+                {/* IDIOMAS */}
                 <div className="relative">
                     <button
                         onClick={() => setLangOpen((v) => !v)}
@@ -105,7 +121,6 @@ const TopBar = ({ onToggleSidebar }: Props) => {
                         "
                     >
                         <Globe className="w-5 h-5" />
-                        {/* TEXTO SOLO DESKTOP */}
                         <span className="hidden sm:inline text-sm font-medium">
                             {i18n.language.toUpperCase()}
                         </span>
@@ -148,12 +163,12 @@ const TopBar = ({ onToggleSidebar }: Props) => {
                     )}
                 </div>
 
-                {/* ZOOM — SOLO DESKTOP */}
+                {/* ZOOM — SIEMPRE */}
                 <button
                     onClick={() =>
                         setFontScale((p) => (p >= 1.3 ? 1 : p + 0.1))
                     }
-                    className="hidden sm:flex p-2 rounded-full hover:bg-secondary/10"
+                    className="p-2 rounded-full hover:bg-secondary/10"
                 >
                     <Glasses className="w-5 h-5" />
                 </button>

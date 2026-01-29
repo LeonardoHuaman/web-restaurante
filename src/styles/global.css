@@ -66,3 +66,14 @@ body {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .print\:flex,
+    .print\:flex * {
+        visibility: visible;
+    }
+}

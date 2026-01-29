@@ -1,113 +1,176 @@
+// src/pages/admin/AdminStatsPage.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
+import { TrendingUp, Users, Flame } from "lucide-react";
+
+type TopProduct = {
+    product_id: string;
+    name: string;
+    image_url: string;
+    total_quantity: number;
+};
+
+type TopWaiter = {
+    codigo_mozo: string;
+    total_parties: number;
+};
 
 const AdminStatsPage = () => {
     const [ingresos, setIngresos] = useState(0);
     const [parties, setParties] = useState(0);
-    const [topProducts, setTopProducts] = useState<any[]>([]);
-    const [topWaiters, setTopWaiters] = useState<any[]>([]);
+    const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
+    const [topWaiters, setTopWaiters] = useState<TopWaiter[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadStats();
     }, []);
 
     const loadStats = async () => {
-        const { data: ingresosHoy } = await supabase.rpc("ingresos_hoy");
-        const { data: partiesHoy } = await supabase.rpc("parties_hoy");
-        const { data: products } = await supabase.rpc("top_products_month");
-        const { data: waiters } = await supabase.rpc("top_waiters_month");
+        setLoading(true);
+
+        const [{ data: ingresosHoy }, { data: partiesHoy }, { data: products }, { data: waiters }] =
+            await Promise.all([
+                supabase.rpc("ingresos_hoy"),
+                supabase.rpc("parties_hoy"),
+                supabase.rpc("top_products_month"),
+                supabase.rpc("top_waiters_month"),
+            ]);
 
         setIngresos(ingresosHoy || 0);
         setParties(partiesHoy || 0);
         setTopProducts(products || []);
         setTopWaiters(waiters || []);
+        setLoading(false);
     };
 
-    const monthName = new Date().toLocaleString("es-PE", {
-        month: "long",
-    });
+    const monthName = new Date().toLocaleString("es-PE", { month: "long" });
 
     return (
-        <div className="space-y-8">
-            <h2 className="text-3xl font-extrabold capitalize">
-                Estadísticas — {monthName}
-            </h2>
+        <div className="space-y-10 animate-fade-in">
+            <header>
+                <h2 className="text-4xl font-black capitalize tracking-tight">
+                    Estadísticas · {monthName}
+                </h2>
+                <p className="text-zinc-500 mt-1">
+                    Rendimiento del restaurante en tiempo real
+                </p>
+            </header>
 
-            {/* CARDS */}
-            <div className="grid grid-cols-2 gap-6">
-                <div className="bg-primary border border-secondary/20 rounded-xl p-6">
-                    <p className="text-secondary/70">Ingresos hoy</p>
-                    <p className="text-3xl font-bold">
+            {/* KPI CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="
+          relative overflow-hidden rounded-3xl p-6
+          bg-gradient-to-br from-emerald-500 to-emerald-700
+          text-white shadow-xl
+        ">
+                    <div className="absolute -top-6 -right-6 opacity-20">
+                        <TrendingUp size={120} />
+                    </div>
+                    <p className="text-white/80">Ingresos hoy</p>
+                    <p className="text-4xl font-black mt-2">
                         S/ {ingresos.toFixed(2)}
                     </p>
                 </div>
 
-                <div className="bg-primary border border-secondary/20 rounded-xl p-6">
-                    <p className="text-secondary/70">Parties hoy</p>
-                    <p className="text-3xl font-bold">
+                <div className="
+          relative overflow-hidden rounded-3xl p-6
+          bg-gradient-to-br from-indigo-500 to-purple-600
+          text-white shadow-xl
+        ">
+                    <div className="absolute -top-6 -right-6 opacity-20">
+                        <Users size={120} />
+                    </div>
+                    <p className="text-white/80">Parties hoy</p>
+                    <p className="text-4xl font-black mt-2">
                         {parties}
                     </p>
                 </div>
             </div>
 
             {/* TOP PRODUCTOS */}
-            <div>
-                <h3 className="text-xl font-bold mb-4">
-                    Top 5 productos del mes
-                </h3>
-
-                <div className="grid grid-cols-5 gap-4">
-                    {topProducts.map((p) => (
-                        <div
-                            key={p.product_id}
-                            className="bg-primary border border-secondary/20 rounded-lg p-4 text-center"
-                        >
-                            <img
-                                src={p.image_url}
-                                alt={p.name}
-                                className="w-full h-24 object-cover rounded-md mb-2"
-                            />
-                            <p className="font-semibold text-sm">
-                                {p.name}
-                            </p>
-                            <p className="text-secondary/70 text-sm">
-                                {p.total_quantity} vendidos
-                            </p>
-                        </div>
-                    ))}
-
-                    {topProducts.length === 0 && (
-                        <p className="text-secondary/70">
-                            No hay datos este mes
-                        </p>
-                    )}
+            <section>
+                <div className="flex items-center gap-2 mb-5">
+                    <Flame className="text-orange-500" />
+                    <h3 className="text-2xl font-bold">
+                        Top productos del mes
+                    </h3>
                 </div>
-            </div>
+
+                {loading ? (
+                    <p className="text-zinc-500">Cargando...</p>
+                ) : topProducts.length === 0 ? (
+                    <p className="text-zinc-500">No hay datos este mes</p>
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+                        {topProducts.map((p, i) => (
+                            <div
+                                key={p.product_id}
+                                className="
+                  group bg-white rounded-3xl p-4
+                  border border-zinc-200 shadow-md
+                  hover:shadow-xl transition-all
+                  hover:-translate-y-1
+                "
+                                style={{ animationDelay: `${i * 80}ms` }}
+                            >
+                                <div className="overflow-hidden rounded-2xl mb-3">
+                                    <img
+                                        src={p.image_url}
+                                        alt={p.name}
+                                        className="
+                      w-full h-28 object-cover
+                      group-hover:scale-105 transition
+                    "
+                                    />
+                                </div>
+                                <p className="font-bold text-sm truncate">
+                                    {p.name}
+                                </p>
+                                <p className="text-zinc-500 text-sm">
+                                    {p.total_quantity} vendidos
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </section>
 
             {/* TOP MOZOS */}
-            <div>
-                <h3 className="text-xl font-bold mb-4">
-                    Top 5 mozos del mes
+            <section>
+                <h3 className="text-2xl font-bold mb-4">
+                    Top mozos del mes
                 </h3>
 
-                <div className="bg-primary border border-secondary/20 rounded-xl overflow-hidden">
+                <div className="
+          bg-white rounded-3xl
+          border border-zinc-200 shadow-lg
+          overflow-hidden
+        ">
                     <table className="w-full">
-                        <thead className="border-b border-secondary/20">
+                        <thead className="bg-zinc-50">
                             <tr>
-                                <th className="p-4 text-left">Mozo</th>
-                                <th className="p-4 text-center">Parties</th>
+                                <th className="p-4 text-left text-sm font-semibold text-zinc-600">
+                                    Mozo
+                                </th>
+                                <th className="p-4 text-center text-sm font-semibold text-zinc-600">
+                                    Parties atendidas
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {topWaiters.map((w) => (
+                            {topWaiters.map((w, i) => (
                                 <tr
                                     key={w.codigo_mozo}
-                                    className="border-t border-secondary/10"
+                                    className="
+                    border-t border-zinc-100
+                    hover:bg-zinc-50 transition
+                  "
                                 >
-                                    <td className="p-4">
-                                        {w.codigo_mozo}
+                                    <td className="p-4 font-semibold">
+                                        #{i + 1} · {w.codigo_mozo}
                                     </td>
-                                    <td className="p-4 text-center">
+                                    <td className="p-4 text-center font-bold">
                                         {w.total_parties}
                                     </td>
                                 </tr>
@@ -117,7 +180,7 @@ const AdminStatsPage = () => {
                                 <tr>
                                     <td
                                         colSpan={2}
-                                        className="p-6 text-center text-secondary/70"
+                                        className="p-6 text-center text-zinc-500"
                                     >
                                         No hay datos este mes
                                     </td>
@@ -126,7 +189,7 @@ const AdminStatsPage = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </section>
         </div>
     );
 };

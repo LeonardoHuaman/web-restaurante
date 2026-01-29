@@ -1,9 +1,7 @@
+// src/pages/admin/AdminTablesPage.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
-
-/* =======================
-   TYPES
-======================= */
+import { Users, Plus, Trash2, Printer } from "lucide-react";
 
 type Waiter =
     | { codigo_mozo: string | null }
@@ -22,45 +20,30 @@ interface TableRow {
     seats: number;
     is_active: boolean;
     qr_token: string;
+    qr_image_url: string | null;
     table_parties: TableParty[];
 }
 
-/* =======================
-   HELPERS
-======================= */
-
 const getCodigoMozo = (waiter: Waiter): string => {
     if (!waiter) return "Libre";
-    if (Array.isArray(waiter)) {
-        return waiter[0]?.codigo_mozo ?? "Libre";
-    }
+    if (Array.isArray(waiter)) return waiter[0]?.codigo_mozo ?? "Libre";
     return waiter.codigo_mozo ?? "Libre";
 };
-
-const getTableUrl = (qrToken: string) =>
-    `${window.location.origin}/?table=${qrToken}`;
-
-/* =======================
-   COMPONENT
-======================= */
 
 const AdminTablesPage = () => {
     const [tables, setTables] = useState<TableRow[]>([]);
     const [loading, setLoading] = useState(false);
 
-    /* FORM STATE */
-    const [tableNumber, setTableNumber] = useState<number>(1);
-    const [seats, setSeats] = useState<number>(4);
-    const [isActive, setIsActive] = useState(true);
+    const [tableNumber, setTableNumber] = useState(1);
+    const [seats, setSeats] = useState(4);
     const [creating, setCreating] = useState(false);
+
+    const [qrToPrint, setQrToPrint] = useState<string | null>(null);
 
     useEffect(() => {
         loadTables();
     }, []);
 
-    /* =======================
-       LOAD TABLES
-    ======================= */
     const loadTables = async () => {
         setLoading(true);
 
@@ -72,6 +55,7 @@ const AdminTablesPage = () => {
         seats,
         is_active,
         qr_token,
+        qr_image_url,
         table_parties (
           id,
           is_active,
@@ -86,183 +70,217 @@ const AdminTablesPage = () => {
         setLoading(false);
     };
 
-    /* =======================
-       CREATE TABLE
-    ======================= */
     const createTable = async () => {
         if (!tableNumber || seats <= 0) return;
 
         setCreating(true);
 
-        const { error } = await supabase
-            .from("tables")
-            .insert({
-                table_number: tableNumber,
-                seats,
-                is_active: isActive,
-            });
+        const res = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-table-with-qr`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+                },
+                body: JSON.stringify({
+                    table_number: tableNumber,
+                    seats,
+                }),
+            }
+        );
 
-        setCreating(false);
+        const data = await res.json();
 
-        if (!error) {
-            setTableNumber(tableNumber + 1);
-            setSeats(4);
-            setIsActive(true);
-            loadTables();
-        }
-    };
-
-    /* =======================
-       CLOSE PARTY
-    ======================= */
-    const closeParty = async (partyId: string) => {
-        const { error } = await supabase.rpc("finalize_table_party", {
-            p_party_id: partyId,
-        });
-
-        if (error) {
-            console.error("Error finalizando mesa:", error);
-            alert("No se pudo finalizar la mesa");
+        if (!res.ok) {
+            console.error(data);
+            alert(JSON.stringify(data));
+            setCreating(false);
             return;
         }
 
+        setCreating(false);
+        setTableNumber(tableNumber + 1);
+        setSeats(4);
         loadTables();
     };
 
+    const closeParty = async (partyId: string) => {
+        await supabase.rpc("finalize_table_party", {
+            p_party_id: partyId,
+        });
+        loadTables();
+    };
 
-    /* =======================
-       COPY QR LINK
-    ======================= */
-    const copyQrLink = async (qrToken: string) => {
-        const url = getTableUrl(qrToken);
-        await navigator.clipboard.writeText(url);
-        alert("Link del QR copiado");
+    const deleteTable = async (tableId: string) => {
+        const ok = confirm("¿Eliminar esta mesa definitivamente?");
+        if (!ok) return;
+
+        await supabase.from("tables").delete().eq("id", tableId);
+        loadTables();
+    };
+
+    const printQrInline = (url: string) => {
+        setQrToPrint(url);
+        setTimeout(() => {
+            window.print();
+            setQrToPrint(null);
+        }, 100);
     };
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-3xl font-extrabold">Mesas</h2>
-
-            {/* =======================
-         CREATE FORM
-      ======================= */}
-            <div className="flex flex-wrap gap-3 items-end bg-secondary/5 p-4 rounded-xl">
-                <div>
-                    <label className="block text-sm mb-1">Mesa</label>
-                    <input
-                        type="number"
-                        value={tableNumber}
-                        onChange={(e) => setTableNumber(Number(e.target.value))}
-                        className="p-2 rounded bg-secondary text-primary w-24"
-                    />
+        <>
+            {/* PRINT SOLO QR */}
+            {qrToPrint && (
+                <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center print:flex">
+                    <img src={qrToPrint} className="w-72 h-72" />
                 </div>
+            )}
 
-                <div>
-                    <label className="block text-sm mb-1">Asientos</label>
-                    <input
-                        type="number"
-                        value={seats}
-                        onChange={(e) => setSeats(Number(e.target.value))}
-                        className="p-2 rounded bg-secondary text-primary w-24"
-                    />
-                </div>
+            <div className="space-y-10 print:hidden">
+                <header>
+                    <h2 className="text-4xl font-black tracking-tight text-zinc-900">
+                        Mesas & QR
+                    </h2>
+                    <p className="text-zinc-500 mt-1">
+                        Gestión moderna y permanente de mesas
+                    </p>
+                </header>
 
-                <div className="flex items-center gap-2 mt-6">
-                    <input
-                        type="checkbox"
-                        checked={isActive}
-                        onChange={(e) => setIsActive(e.target.checked)}
-                    />
-                    <span>Activa</span>
-                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* CREAR MESA */}
+                    <div className="bg-white rounded-3xl p-7 shadow-lg border border-zinc-200">
+                        <h3 className="font-bold text-lg mb-6 text-zinc-900">
+                            Agregar mesa
+                        </h3>
 
-                <button
-                    onClick={createTable}
-                    disabled={creating}
-                    className="
-            px-5 py-2 rounded-lg
-            bg-accent text-secondary
-            font-semibold
-            disabled:opacity-50
-          "
-                >
-                    {creating ? "Creando..." : "Agregar mesa"}
-                </button>
-            </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-semibold text-zinc-600">
+                                    NÚMERO
+                                </label>
+                                <input
+                                    type="number"
+                                    value={tableNumber}
+                                    onChange={(e) => setTableNumber(Number(e.target.value))}
+                                    className="mt-1 w-full p-3 rounded-xl bg-zinc-50 border border-zinc-300 focus:ring-2 focus:ring-orange-500"
+                                />
+                            </div>
 
-            {/* =======================
-         TABLE LIST
-      ======================= */}
-            <div className="bg-primary border border-secondary/20 rounded-xl overflow-hidden">
-                <table className="w-full">
-                    <thead className="border-b border-secondary/20">
-                        <tr>
-                            <th className="p-4 text-left">Mesa</th>
-                            <th className="p-4 text-center">Asientos</th>
-                            <th className="p-4 text-center">Estado</th>
-                            <th className="p-4 text-center">Mozo</th>
-                            <th className="p-4 text-center">QR</th>
-                            <th className="p-4 text-center">Acción</th>
-                        </tr>
-                    </thead>
+                            <div>
+                                <label className="text-xs font-semibold text-zinc-600">
+                                    ASIENTOS
+                                </label>
+                                <input
+                                    type="number"
+                                    value={seats}
+                                    onChange={(e) => setSeats(Number(e.target.value))}
+                                    className="mt-1 w-full p-3 rounded-xl bg-zinc-50 border border-zinc-300 focus:ring-2 focus:ring-orange-500"
+                                />
+                            </div>
 
-                    <tbody>
-                        {tables.map((t) => {
-                            const activeParty = t.table_parties.find(p => p.is_active);
+                            <button
+                                onClick={createTable}
+                                disabled={creating}
+                                className="w-full mt-6 py-3 rounded-full bg-accent hover:bg-accent/80 text-white font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                <Plus size={18} />
+                                {creating ? "Creando..." : "Crear mesa"}
+                            </button>
+                        </div>
+                    </div>
 
-                            return (
-                                <tr key={t.id} className="border-t border-secondary/10">
-                                    <td className="p-4">Mesa #{t.table_number}</td>
-                                    <td className="p-4 text-center">{t.seats}</td>
-                                    <td className="p-4 text-center">
-                                        {t.is_active ? "Activa" : "Inactiva"}
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        {activeParty
-                                            ? getCodigoMozo(activeParty.waiter)
-                                            : "Libre"}
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        <button
-                                            onClick={() => copyQrLink(t.qr_token)}
-                                            className="px-3 py-1 rounded-md bg-secondary text-primary text-sm"
+                    {/* LISTADO */}
+                    <div className="lg:col-span-2">
+                        <div className="flex justify-between items-center mb-5">
+                            <h3 className="font-bold text-xl text-zinc-900">
+                                Mesas registradas
+                            </h3>
+                            <span className="text-sm px-4 py-1 rounded-full bg-zinc-900 text-white">
+                                {tables.length} mesas
+                            </span>
+                        </div>
+
+                        {loading ? (
+                            <p className="text-zinc-500">Cargando...</p>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                {tables.map((t) => {
+                                    const activeParty = t.table_parties.find(
+                                        (p) => p.is_active
+                                    );
+
+                                    return (
+                                        <div
+                                            key={t.id}
+                                            className="bg-white rounded-3xl p-6 shadow-lg border border-zinc-200"
                                         >
-                                            Copiar link
-                                        </button>
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        {activeParty && (
-                                            <button
-                                                onClick={() => closeParty(activeParty.id)}
-                                                className="px-4 py-1 rounded-md bg-secondary text-primary"
-                                            >
-                                                Finalizar
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <h4 className="text-2xl font-black text-zinc-900">
+                                                        M-{t.table_number}
+                                                    </h4>
+                                                    <span className="text-xs text-zinc-500">
+                                                        Capacidad {t.seats}
+                                                    </span>
+                                                </div>
 
-                        {!loading && tables.length === 0 && (
-                            <tr>
-                                <td colSpan={6} className="p-6 text-center text-secondary/70">
-                                    No hay mesas registradas
-                                </td>
-                            </tr>
-                        )}
+                                                <div className="flex items-center gap-1 text-xs bg-zinc-100 px-3 py-1 rounded-full text-zinc-700">
+                                                    <Users size={14} />
+                                                    {t.seats}
+                                                </div>
+                                            </div>
 
-                        {loading && (
-                            <tr>
-                                <td colSpan={6} className="p-6 text-center">
-                                    Cargando...
-                                </td>
-                            </tr>
+                                            {t.qr_image_url && (
+                                                <div className="mt-4 flex justify-center bg-zinc-50 p-4 rounded-2xl border">
+                                                    <img
+                                                        src={t.qr_image_url}
+                                                        alt={`QR Mesa ${t.table_number}`}
+                                                        className="w-40 h-40"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <div className="mt-5 flex gap-2">
+                                                {t.qr_image_url && (
+                                                    <button
+                                                        onClick={() => printQrInline(t.qr_image_url!)}
+                                                        className="flex-1 py-2.5 rounded-full bg-zinc-900 text-white font-semibold hover:bg-zinc-800 flex items-center justify-center gap-2"
+                                                    >
+                                                        <Printer size={16} />
+                                                        Imprimir
+                                                    </button>
+                                                )}
+
+                                                <button
+                                                    onClick={() => deleteTable(t.id)}
+                                                    className="px-4 py-2.5 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200 flex items-center justify-center"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+
+                                            {activeParty ? (
+                                                <button
+                                                    onClick={() => closeParty(activeParty.id)}
+                                                    className="w-full mt-3 py-2.5 rounded-full bg-rose-100 text-rose-700 font-semibold hover:bg-rose-200"
+                                                >
+                                                    Finalizar mesa ({getCodigoMozo(activeParty.waiter)})
+                                                </button>
+                                            ) : (
+                                                <div className="mt-3 text-center text-xs text-emerald-600 font-semibold">
+                                                    Mesa libre
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         )}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 
