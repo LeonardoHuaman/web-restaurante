@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePartyCartStore } from "../../stores/partyCartStore";
 import { usePartyStore } from "../../stores/partyStore";
 import { supabase } from "../../services/supabaseClient";
@@ -10,9 +10,19 @@ interface Props {
 }
 
 const OrderModal = ({ open, onClose }: Props) => {
-    const { items, clearCart } = usePartyCartStore();
+    const { items } = usePartyCartStore(); // ❌ clearCart eliminado
     const { partyId } = usePartyStore();
     const [loading, setLoading] = useState(false);
+
+    /* =======================
+       🔥 ÉXITO = CARRITO VACÍO
+    ======================= */
+    useEffect(() => {
+        if (loading && items.length === 0) {
+            setLoading(false);
+            onClose();
+        }
+    }, [items.length, loading, onClose]);
 
     if (!open) return null;
 
@@ -45,12 +55,12 @@ const OrderModal = ({ open, onClose }: Props) => {
         if (error) {
             setLoading(false);
             alert(error.message);
-            return;
         }
 
-        clearCart();
-        setLoading(false);
-        onClose();
+        // ❌ NO clearCart
+        // ❌ NO onClose aquí
+        // ❌ NO setLoading(false) aquí
+        // realtime manda
     };
 
     return (
