@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 import { Product } from "../types/Product";
 import { Category } from "../types/Category";
-import CategoryCarousel from "../components/menu/CategoryCarousel";
-import ProductCard from "../components/menu/ProductCard";
+import CategoryCarousel from "../features/menu/CategoryCarousel";
+import ProductCard from "../features/menu/ProductCard";
 import { useTranslation } from "react-i18next";
 
 const MenuPage = () => {

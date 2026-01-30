@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { supabase } from "../services/supabaseClient";
-import { useTableStore } from "../stores/tableStore";
-import { useSessionStore } from "../stores/sessionStore";
-import { usePartyStore } from "../stores/partyStore";
-import { getOrCreateParty } from "../utils/party";
+import { supabase } from "../../services/supabaseClient";
+import { useTableStore } from "../../stores/tableStore";
+import { useSessionStore } from "../../stores/sessionStore";
+import { usePartyStore } from "../../stores/partyStore";
+import { getOrCreateParty } from "../../shared/utils/party";
 
 const TWO_HOURS = 2 * 60 * 60 * 1000;
 

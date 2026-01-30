@@ -1,4 +1,3 @@
-// src/components/menu/ProductCard.tsx
 import { Plus, Minus } from "lucide-react";
 import { Product } from "../../types/Product";
 import { usePartyCartStore } from "../../stores/partyCartStore";

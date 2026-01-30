@@ -5,7 +5,7 @@ import App from "./app/App";
 import "./styles/tailwind.css";
 import "./styles/global.css";
 import "./i18n";
-import { AuthProvider } from "./providers/AuthProvider";
+import { AuthProvider } from "./features/auth/AuthProvider";
 import { useThemeStore } from "./stores/themeStore";
 
 useThemeStore

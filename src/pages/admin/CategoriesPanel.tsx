@@ -4,8 +4,8 @@ import { Pencil } from "lucide-react";
 import { supabase } from "../../services/supabaseClient";
 import CategoryModal from "./CategoryModal";
 import EditCategoryModal from "./EditCategoryModal";
-import { formatCategoryName } from "../../utils/formatCategoryName";
-import { FoodIconName } from "../../constants/foodIcons";
+import { formatCategoryName } from "../../shared/utils/formatCategoryName";
+import { FoodIconName } from "../../shared/constants/foodIcons";
 
 interface CategoryRow {
     id: string;

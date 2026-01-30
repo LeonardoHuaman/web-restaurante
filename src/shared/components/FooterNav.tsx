@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { usePartyCartStore } from "../../stores/partyCartStore";
-import OrderModal from "../order/OrderModal";
+import OrderModal from "../../features/orders/OrderModal";
 
 const FooterNav = () => {
     const { pathname } = useLocation();

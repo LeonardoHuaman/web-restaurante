@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { supabase } from "../../services/supabaseClient";
-import { foodIcons, FoodIconName } from "../../constants/foodIcons";
+import { foodIcons, FoodIconName } from "../../shared/constants/foodIcons";
 
 interface Props {
     category: {

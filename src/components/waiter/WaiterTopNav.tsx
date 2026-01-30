@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../../services/supabaseClient";
-import { useRestaurantSettings } from "../../hooks/useRestaurantSettings";
+import { useRestaurantSettings } from "../../features/restaurant/useRestaurantSettings";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { usePartyStore } from "../stores/partyStore";
-import { usePartyCartStore } from "../stores/partyCartStore";
+import { usePartyStore } from "../../../stores/partyStore";
+import { usePartyCartStore } from "../../../stores/partyCartStore";
 
 export const useLoadPartyCart = () => {
     const { partyId } = usePartyStore();

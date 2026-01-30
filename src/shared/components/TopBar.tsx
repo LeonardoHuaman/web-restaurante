@@ -11,7 +11,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { usePartyStore } from "../../stores/partyStore";
 import { usePartyMembers } from "../../hooks/usePartyMembers";
-import { useRestaurantSettings } from "../../hooks/useRestaurantSettings";
+import { useRestaurantSettings } from "../../features/restaurant/useRestaurantSettings";
 
 i18n.use(initReactI18next).init({
     resources: { es: { translation: {} }, en: { translation: {} } },

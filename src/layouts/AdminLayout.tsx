@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import AdminTopNav from "../components/admin/AdminTopNav";
-import AdminSafeWrapper from "../components/layout/AdminSafeWrapper";
+import AdminSafeWrapper from "./AdminSafeWrapper";
 
 const AdminLayout = () => {
     return (

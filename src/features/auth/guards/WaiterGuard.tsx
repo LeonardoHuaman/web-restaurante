@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../../providers/AuthProvider";
+import { useAuth } from "../../../providers/AuthProvider";
 
 const WaiterGuard = ({ children }: { children: JSX.Element }) => {
     const { loading, role } = useAuth();

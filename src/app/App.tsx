@@ -1,12 +1,12 @@
 import { Routes, Route } from "react-router-dom";
-import TableProvider from "../providers/TableProvider";
-import TableGuard from "../components/guards/TableGuard";
+import TableProvider from "../features/tables/TableProvider";
+import TableGuard from "../features/auth/guards/TableGuard";
 import MainLayout from "../layouts/MainLayout";
 import MenuPage from "../pages/MenuPage";
 import OrderStatusPage from "../pages/OrderStatusPage";
 import LoginPage from "../pages/LoginPage";
-import AdminGuard from "../components/guards/AdminGuard";
-import WaiterGuard from "../components/guards/WaiterGuard";
+import AdminGuard from "../features/auth/guards/AdminGuard";
+import WaiterGuard from "../features/auth/guards/WaiterGuard";
 import AdminLayout from "../layouts/AdminLayout";
 import WaiterLayout from "../layouts/WaiterLayout";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
@@ -17,7 +17,7 @@ import AdminTablesPage from "../pages/admin/AdminTablesPage";
 import WaiterTablesPage from "../pages/waiter/WaiterTablesPage";
 import WaiterPartyDetailPage from "../pages/waiter/WaiterPartyDetailPage";
 import WaiterMyTablesPage from "../pages/waiter/WaiterMyTablesPage";
-import { useLoadPartyCart } from "../hooks/useLoadPartyCart";
+import { useLoadPartyCart } from "../features/orders/hooks/useLoadPartyCart";
 import RestaurantSettingsPage from "../pages/admin/RestaurantSettingsPage";
 
 const InvalidTable = () => (

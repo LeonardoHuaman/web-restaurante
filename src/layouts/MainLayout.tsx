@@ -1,9 +1,9 @@
 import { Outlet } from "react-router-dom";
-import TopBar from "../components/layout/TopBar";
-import FooterNav from "../components/layout/FooterNav";
+import TopBar from "../shared/components/TopBar";
+import FooterNav from "../shared/components/FooterNav";
 
 import { usePartyStore } from "../stores/partyStore";
-import { usePartyCartRealtime } from "../hooks/usePartyCartRealtime";
+import { usePartyCartRealtime } from "../features/orders/hooks/usePartyCartRealtime";
 
 const MainLayout = () => {
     const { partyId } = usePartyStore();

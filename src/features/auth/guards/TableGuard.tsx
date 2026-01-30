@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useTableStore } from "../../stores/tableStore";
+import { useTableStore } from "../../../stores/tableStore";
 
 const TableGuard = ({ children }: { children: JSX.Element }) => {
     const { isReady, isLoading } = useTableStore();
