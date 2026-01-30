@@ -1,4 +1,3 @@
-// src/components/admin/CategoryModal.tsx  (CREAR)
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -103,8 +102,8 @@ const CategoryModal = ({ onClose, onSaved }: Props) => {
                                         setIcon(key as FoodIconName)
                                     }
                                     className={`h-12 rounded-xl flex items-center justify-center ${icon === key
-                                            ? "bg-accent text-white"
-                                            : "bg-gray-100"
+                                        ? "bg-accent text-white"
+                                        : "bg-gray-100"
                                         }`}
                                 >
                                     <Icon />

@@ -1,4 +1,3 @@
-// src/hooks/usePartyCartRealtime.ts
 import { useEffect } from "react";
 import { supabase } from "../services/supabaseClient";
 import { usePartyCartStore } from "../stores/partyCartStore";
@@ -9,10 +8,8 @@ export const usePartyCartRealtime = (partyId: string | null) => {
     useEffect(() => {
         if (!partyId) return;
 
-        // ✅ CARGA INICIAL (CLAVE)
         loadCart(partyId);
 
-        // ✅ REALTIME: CUALQUIER CAMBIO RECARGA EL CARRITO
         const channel = supabase
             .channel(`party-cart-${partyId}`)
             .on(

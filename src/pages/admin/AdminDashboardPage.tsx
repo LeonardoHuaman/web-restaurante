@@ -1,4 +1,3 @@
-// src/pages/admin/AdminDashboardPage.tsx
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -18,7 +17,6 @@ import { useAdminDashboardRealtime } from "../../hooks/useAdminDashboardRealtime
 import { usePeopleTodayByHour } from "../../hooks/usePeopleTodayByHour";
 import PeopleChart from "../../components/admin/PeopleChart";
 
-/* ---------- COMPONENTES ---------- */
 
 const QuickAction = ({
     icon,
@@ -122,7 +120,6 @@ const StatCard = ({
     </div>
 );
 
-/* ---------- PAGE ---------- */
 
 const AdminDashboardPage = () => {
     const navigate = useNavigate();
@@ -177,7 +174,6 @@ const AdminDashboardPage = () => {
 
     return (
         <div className="space-y-10 pb-6">
-            {/* QUICK ACTIONS */}
             <section>
                 <h2 className="text-xl font-bold mb-4">
                     Acciones rápidas
@@ -200,7 +196,6 @@ const AdminDashboardPage = () => {
                 </div>
             </section>
 
-            {/* ESTADO DEL RESTAURANTE */}
             <section>
                 <h2 className="text-xl font-bold mb-4">
                     Estado del restaurante
@@ -245,7 +240,6 @@ const AdminDashboardPage = () => {
                 </div>
             </section>
 
-            {/* GRÁFICA */}
             <section>
                 <div className="bg-secondary rounded-2xl p-3 sm:p-6 overflow-x-auto">
                     <div className="min-w-[600px] sm:min-w-0">

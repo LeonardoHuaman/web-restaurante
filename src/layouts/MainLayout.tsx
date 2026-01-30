@@ -13,8 +13,7 @@ const MainLayout = () => {
         <div className="h-screen flex flex-col overflow-hidden bg-primary">
             <TopBar onToggleSidebar={() => { }} />
 
-            {/* 🔑 FONDO NEGRO VA AQUÍ */}
-            <main className="flex-1 overflow-y-auto bg-primary">
+            <main className="flex-1 overflow-y-auto bg-primary app-safe">
                 <Outlet />
             </main>
 

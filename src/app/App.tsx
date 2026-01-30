@@ -32,9 +32,6 @@ function App() {
   return (
     <div className="min-h-screen bg-primary text-secondary transition-colors duration-300">
       <Routes>
-        {/* =======================
-            CLIENTE / MESA
-        ======================= */}
         <Route
           element={
             <TableProvider>
@@ -50,14 +47,7 @@ function App() {
 
         <Route path="invalid-table" element={<InvalidTable />} />
 
-        {/* =======================
-            AUTH
-        ======================= */}
         <Route path="login" element={<LoginPage />} />
-
-        {/* =======================
-            ADMIN
-        ======================= */}
         <Route
           path="admin"
           element={
@@ -74,9 +64,6 @@ function App() {
           <Route path="configuracion" element={<RestaurantSettingsPage />} />
         </Route>
 
-        {/* =======================
-            WAITER
-        ======================= */}
         <Route
           path="waiter"
           element={

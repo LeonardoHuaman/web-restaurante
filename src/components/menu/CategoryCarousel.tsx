@@ -1,4 +1,3 @@
-// src/components/categories/CategoryCarousel.tsx
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -14,9 +13,6 @@ interface Props {
 
 const SCROLL_AMOUNT = 260;
 
-/* ===============================
-   ORDEN ESTABLE
-=============================== */
 const orderCategories = (categories: Category[]) => {
     return [...categories].sort((a, b) => {
         if (a.name === "chef_recommendation") return -1;
@@ -87,7 +83,6 @@ const CategoryCarousel = ({
 
     return (
         <div className="w-full flex items-center gap-2 px-2">
-            {/* BOTÓN IZQUIERDO — SOLO DESKTOP */}
             <div className="w-10 justify-center hidden md:flex">
                 {canScrollLeft && (
                     <motion.button
@@ -105,7 +100,6 @@ const CategoryCarousel = ({
                 )}
             </div>
 
-            {/* CAROUSEL */}
             <div
                 ref={scrollRef}
                 className="
@@ -175,7 +169,6 @@ const CategoryCarousel = ({
                 })}
             </div>
 
-            {/* BOTÓN DERECHO — SOLO DESKTOP */}
             <div className="w-10 justify-center hidden md:flex">
                 {canScrollRight && (
                     <motion.button

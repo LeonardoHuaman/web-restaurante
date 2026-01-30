@@ -25,9 +25,6 @@ const TableProvider = ({ children }: { children: React.ReactNode }) => {
         const init = async () => {
             const tableToken = params.get("table");
 
-            /* ===============================
-               CASO 1: YA TENGO SESSION_TOKEN
-            =============================== */
             if (sessionToken) {
                 const { data, error } = await supabase
                     .from("table_sessions")
@@ -60,13 +57,9 @@ const TableProvider = ({ children }: { children: React.ReactNode }) => {
                     return;
                 }
 
-                // si la sesión es inválida, la limpiamos
                 setSession(null as any);
             }
 
-            /* ===============================
-               CASO 2: VIENE DESDE QR (SIN SESSION)
-            =============================== */
             if (tableToken) {
                 const { data: table, error } = await supabase
                     .from("tables")
@@ -109,9 +102,6 @@ const TableProvider = ({ children }: { children: React.ReactNode }) => {
                 return;
             }
 
-            /* ===============================
-               CASO 3: NO HAY NADA
-            =============================== */
             setInvalid();
             navigate("/invalid-table", { replace: true });
         };

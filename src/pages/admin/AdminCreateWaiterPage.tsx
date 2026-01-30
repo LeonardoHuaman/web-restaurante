@@ -1,4 +1,3 @@
-// src/pages/admin/AdminCreateWaiterPage.tsx
 import { useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { UserPlus, Phone, Lock, BadgeCheck } from "lucide-react";
@@ -57,7 +56,6 @@ const AdminCreateWaiterPage = () => {
 
     return (
         <div className="max-w-3xl mx-auto space-y-10">
-            {/* HEADER */}
             <header>
                 <h2 className="text-4xl font-black tracking-tight text-zinc-900">
                     Crear mozo
@@ -68,10 +66,8 @@ const AdminCreateWaiterPage = () => {
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* FORM */}
                 <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-lg border border-zinc-200">
                     <form onSubmit={createWaiter} className="space-y-6">
-                        {/* fake inputs anti-autofill */}
                         <input type="text" name="fake-user" autoComplete="username" className="hidden" />
                         <input type="password" name="fake-pass" autoComplete="new-password" className="hidden" />
 
@@ -136,7 +132,6 @@ const AdminCreateWaiterPage = () => {
                     </form>
                 </div>
 
-                {/* INFO CARD */}
                 <aside className="bg-zinc-900 text-white rounded-3xl p-8 shadow-xl flex flex-col justify-between">
                     <div>
                         <h3 className="text-xl font-bold mb-4">

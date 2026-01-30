@@ -3,10 +3,6 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../../services/supabaseClient";
 import { Clock, Loader2, CheckCircle2 } from "lucide-react";
 
-/* =======================
-   TIPOS
-======================= */
-
 type OrderStatus = "generado" | "en_curso" | "finalizado";
 
 interface OrderItem {
@@ -24,10 +20,6 @@ interface Order {
     created_at: string;
     order_items: OrderItem[];
 }
-
-/* =======================
-   LABELS / ICONOS / COLORES
-======================= */
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
     generado: "Generado",
@@ -47,10 +39,6 @@ const STATUS_ICON: Record<OrderStatus, any> = {
     finalizado: CheckCircle2,
 };
 
-/* =======================
-   COMPONENTE
-======================= */
-
 const WaiterPartyDetailPage = () => {
     const { partyId } = useParams();
     const navigate = useNavigate();
@@ -61,17 +49,10 @@ const WaiterPartyDetailPage = () => {
 
     const from = location.state?.from;
 
-    /* =======================
-       VOLVER
-    ======================= */
     const goBack = () => {
         if (from === "mine") navigate("/waiter/my-tables");
         else navigate("/waiter");
     };
-
-    /* =======================
-       FETCH + REALTIME
-    ======================= */
     const fetchOrders = async () => {
         if (!partyId) return;
 
@@ -132,9 +113,6 @@ const WaiterPartyDetailPage = () => {
         };
     }, [partyId]);
 
-    /* =======================
-       ORDEN CRONOLÓGICO
-    ======================= */
     const orderedOrders = useMemo(() => {
         return [...orders].sort(
             (a, b) =>
@@ -143,9 +121,6 @@ const WaiterPartyDetailPage = () => {
         );
     }, [orders]);
 
-    /* =======================
-       ESTADO GENERAL DE LA MESA
-    ======================= */
     const globalStatus: OrderStatus | null = useMemo(() => {
         if (orders.length === 0) return null;
 
@@ -164,9 +139,6 @@ const WaiterPartyDetailPage = () => {
     const GlobalIcon =
         globalStatus !== null ? STATUS_ICON[globalStatus] : null;
 
-    /* =======================
-       UPDATE ESTADO
-    ======================= */
     const updateStatus = async (
         orderId: string,
         newStatus: OrderStatus
@@ -185,9 +157,6 @@ const WaiterPartyDetailPage = () => {
         );
     }
 
-    /* =======================
-       RENDER (CON SCROLL)
-    ======================= */
     return (
         <div className="bg-primary text-secondary h-full overflow-y-auto p-6">
             <button
@@ -227,7 +196,6 @@ const WaiterPartyDetailPage = () => {
                             key={order.id}
                             className="bg-secondary text-primary rounded-2xl p-5 shadow-md"
                         >
-                            {/* HEADER */}
                             <div className="flex justify-between items-center mb-3">
                                 <h2 className="text-lg font-bold">
                                     Pedido {index + 1}
@@ -241,7 +209,6 @@ const WaiterPartyDetailPage = () => {
                                 </span>
                             </div>
 
-                            {/* ITEMS */}
                             <div className="space-y-2 mb-4">
                                 {order.order_items.map((item, i) => (
                                     <div
@@ -258,7 +225,6 @@ const WaiterPartyDetailPage = () => {
                                 ))}
                             </div>
 
-                            {/* ACCIONES */}
                             <div className="flex gap-3 mb-3">
                                 {order.status !== "generado" && (
                                     <button
@@ -294,7 +260,6 @@ const WaiterPartyDetailPage = () => {
                                 )}
                             </div>
 
-                            {/* TOTAL */}
                             <div className="text-right font-semibold">
                                 Total pedido: S/ {order.total}
                             </div>

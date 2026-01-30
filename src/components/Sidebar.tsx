@@ -21,14 +21,12 @@ const Sidebar = ({ title, items }: SidebarProps) => {
         flex flex-col
       "
         >
-            {/* HEADER */}
             <div className="px-6 py-5 border-b border-secondary/30">
                 <h1 className="text-xl font-extrabold text-secondary">
                     {title}
                 </h1>
             </div>
 
-            {/* MENU */}
             <nav className="flex-1 p-4 space-y-1">
                 {items.map((item) => (
                     <NavLink
@@ -46,7 +44,6 @@ const Sidebar = ({ title, items }: SidebarProps) => {
               `
                         }
                     >
-                        {/* ICONO (OPCIONAL) */}
                         {item.icon && (
                             <span className="w-5 h-5 shrink-0">
                                 {item.icon}

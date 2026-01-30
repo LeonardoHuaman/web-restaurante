@@ -1,4 +1,3 @@
-// src/pages/MenuPage.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 import { Product } from "../types/Product";
@@ -53,7 +52,14 @@ const MenuPage = () => {
     );
 
     return (
-        <div className="bg-primary px-3 sm:px-4 pt-4 pb-24 min-h-screen">
+        <div
+            className="
+                bg-primary
+                px-3 sm:px-4 pt-4
+                min-h-screen
+                pb-[120px] sm:pb-24
+            "
+        >
             <CategoryCarousel
                 categories={categories}
                 selectedCategoryId={selectedCategoryId}

@@ -1,4 +1,3 @@
-// src/pages/admin/AdminMenuCMSPage.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import CategoriesPanel from "./CategoriesPanel";
@@ -91,7 +90,6 @@ const AdminMenuCMSPage = () => {
 
     return (
         <div className="space-y-6">
-            {/* HEADER */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-extrabold">
@@ -119,7 +117,6 @@ const AdminMenuCMSPage = () => {
                 </button>
             </div>
 
-            {/* MOBILE FILTER */}
             <div className="sm:hidden">
                 <button
                     onClick={() => setShowCategories(true)}
@@ -134,9 +131,7 @@ const AdminMenuCMSPage = () => {
                 </button>
             </div>
 
-            {/* CONTENT */}
             <div className="grid grid-cols-1 sm:grid-cols-[280px_1fr] gap-6">
-                {/* CATEGORIES */}
                 <aside className="hidden sm:block">
                     <CategoriesPanel
                         selectedCategoryId={selectedCategory}
@@ -144,7 +139,6 @@ const AdminMenuCMSPage = () => {
                     />
                 </aside>
 
-                {/* PRODUCTS */}
                 <section className="space-y-4">
                     <input
                         placeholder="Buscar productos..."
@@ -174,7 +168,6 @@ const AdminMenuCMSPage = () => {
                 </section>
             </div>
 
-            {/* MOBILE CATEGORIES DRAWER */}
             {showCategories && (
                 <div className="fixed inset-0 z-40 bg-black/40 sm:hidden">
                     <div className="

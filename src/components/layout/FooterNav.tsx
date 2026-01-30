@@ -1,4 +1,3 @@
-// src/components/layout/FooterNav.tsx
 import { useLocation, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
@@ -18,13 +17,7 @@ const FooterNav = () => {
 
     return (
         <>
-            <footer className="
-                fixed sm:sticky bottom-0
-                w-full py-3 z-30
-                flex justify-around
-                bg-primary
-                border-t border-secondary/20
-            ">
+            <footer className="fixed sm:sticky bottom-0 w-full py-3 z-30 flex justify-around bg-primary border-t border-secondary/20">
                 <button
                     onClick={() => navigate("/")}
                     className="flex flex-col items-center gap-1 font-semibold text-secondary"

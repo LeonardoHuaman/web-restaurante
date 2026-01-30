@@ -1,4 +1,3 @@
-// src/components/admin/CategoriesPanel.tsx
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Pencil } from "lucide-react";

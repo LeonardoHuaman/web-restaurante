@@ -1,4 +1,3 @@
-// src/pages/admin/AdminStatsPage.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { TrendingUp, Users, Flame } from "lucide-react";
@@ -57,7 +56,6 @@ const AdminStatsPage = () => {
                 </p>
             </header>
 
-            {/* KPI CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="
           relative overflow-hidden rounded-3xl p-6
@@ -88,7 +86,6 @@ const AdminStatsPage = () => {
                 </div>
             </div>
 
-            {/* TOP PRODUCTOS */}
             <section>
                 <div className="flex items-center gap-2 mb-5">
                     <Flame className="text-orange-500" />
@@ -136,7 +133,6 @@ const AdminStatsPage = () => {
                 )}
             </section>
 
-            {/* TOP MOZOS */}
             <section>
                 <h3 className="text-2xl font-bold mb-4">
                     Top mozos del mes

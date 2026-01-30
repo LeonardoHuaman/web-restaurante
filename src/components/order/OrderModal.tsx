@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { usePartyCartStore } from "../../stores/partyCartStore";
 import { usePartyStore } from "../../stores/partyStore";
 import { supabase } from "../../services/supabaseClient";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 
 interface Props {
     open: boolean;
@@ -11,6 +12,7 @@ interface Props {
 const OrderModal = ({ open, onClose }: Props) => {
     const { items, clearCart } = usePartyCartStore();
     const { partyId } = usePartyStore();
+    const [loading, setLoading] = useState(false);
 
     if (!open) return null;
 
@@ -20,14 +22,15 @@ const OrderModal = ({ open, onClose }: Props) => {
     );
 
     const handleGenerateOrder = async () => {
-        if (items.length === 0 || !partyId) return;
+        if (loading || items.length === 0 || !partyId) return;
 
         const sessionToken = localStorage.getItem("session_token");
-
         if (!sessionToken) {
             alert("Sesión de mesa no encontrada. Escanee el QR nuevamente.");
             return;
         }
+
+        setLoading(true);
 
         const { error } = await supabase.functions.invoke(
             "generate-order",
@@ -40,15 +43,15 @@ const OrderModal = ({ open, onClose }: Props) => {
         );
 
         if (error) {
+            setLoading(false);
             alert(error.message);
             return;
         }
 
         clearCart();
+        setLoading(false);
         onClose();
     };
-
-
 
     return (
         <div className="fixed inset-0 z-50 flex items-end bg-black/40">
@@ -68,11 +71,13 @@ const OrderModal = ({ open, onClose }: Props) => {
                         Tu pedido
                     </h2>
                     <button
-                        onClick={onClose}
+                        onClick={!loading ? onClose : undefined}
+                        disabled={loading}
                         className="
                             p-2 rounded-full
                             hover:bg-primary/10
                             transition
+                            disabled:opacity-50
                         "
                     >
                         <X className="w-5 h-5" />
@@ -83,10 +88,7 @@ const OrderModal = ({ open, onClose }: Props) => {
                     {items.map((item) => (
                         <div
                             key={item.product_id}
-                            className="
-                                flex items-center gap-3
-                                text-sm
-                            "
+                            className="flex items-center gap-3 text-sm"
                         >
                             {item.image_url && (
                                 <img
@@ -126,17 +128,21 @@ const OrderModal = ({ open, onClose }: Props) => {
 
                 <button
                     onClick={handleGenerateOrder}
-                    disabled={items.length === 0}
+                    disabled={items.length === 0 || loading}
                     className={`
                         mt-5 w-full py-3 rounded-lg
                         font-semibold transition
-                        ${items.length > 0
+                        flex items-center justify-center gap-2
+                        ${!loading && items.length > 0
                             ? "bg-accent text-secondary hover:brightness-110"
                             : "bg-accent/30 text-secondary/60 cursor-not-allowed"
                         }
                     `}
                 >
-                    Generar pedido
+                    {loading && (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                    )}
+                    {loading ? "Enviando pedido..." : "Generar pedido"}
                 </button>
             </div>
         </div>

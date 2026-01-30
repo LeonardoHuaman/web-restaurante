@@ -1,4 +1,3 @@
-// frontend/stores/sessionStore.ts
 import { create } from "zustand";
 
 interface SessionState {

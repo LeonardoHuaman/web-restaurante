@@ -1,4 +1,3 @@
-// src/pages/OrderStatusPage.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 import { usePartyStore } from "../stores/partyStore";
@@ -10,6 +9,9 @@ import {
     Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const FOOTER_NAV_HEIGHT = 64;
+const TOTAL_BAR_HEIGHT = 80;
 
 interface Order {
     id: string;
@@ -32,17 +34,17 @@ const statusConfig = {
     generado: {
         label: "Generado",
         icon: Clock,
-        color: "text-green-600",
+        color: "text-emerald-600",
     },
     en_curso: {
         label: "En curso",
         icon: Loader2,
-        color: "text-orange-600",
+        color: "text-orange-500",
     },
     finalizado: {
         label: "Entregado",
         icon: CheckCircle2,
-        color: "text-red-600",
+        color: "text-sky-600",
     },
 };
 
@@ -91,7 +93,7 @@ const OrderStatusPage = () => {
     const openOrder = async (order: Order) => {
         setSelectedOrder(order);
 
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from("order_items")
             .select(`
                 product_id,
@@ -103,23 +105,26 @@ const OrderStatusPage = () => {
                 )
             `)
             .eq("order_id", order.id);
-        console.log("📦 RAW order_items:", data);
-        if (error) {
-            console.error("Error cargando detalle:", error);
-            return;
-        }
+
         if (!data) return;
 
-        const formattedData: OrderItem[] = data.map((item: any) => ({
-            ...item,
-            products: Array.isArray(item.products) ? item.products[0] : item.products,
-        }));
-
-        setOrderItems(formattedData);
+        setOrderItems(
+            data.map((item: any) => ({
+                ...item,
+                products: Array.isArray(item.products)
+                    ? item.products[0]
+                    : item.products,
+            }))
+        );
     };
 
     return (
-        <div className="bg-primary text-secondary px-4 pt-4 pb-24">
+        <div
+            className="bg-primary text-secondary px-4 pt-4 min-h-screen"
+            style={{
+                paddingBottom: `calc(${FOOTER_NAV_HEIGHT + TOTAL_BAR_HEIGHT}px + env(safe-area-inset-bottom))`,
+            }}
+        >
             <h1 className="text-2xl font-extrabold mb-6">
                 Estado de tus pedidos
             </h1>
@@ -139,7 +144,6 @@ const OrderStatusPage = () => {
                                 bg-secondary text-primary
                                 rounded-2xl
                                 p-5 shadow-md
-                                relative overflow-hidden
                             "
                         >
                             <div className="flex justify-between items-center">
@@ -171,7 +175,19 @@ const OrderStatusPage = () => {
             </div>
 
             {orders.length > 0 && (
-                <div className="fixed bottom-16 left-0 right-0 bg-primary border-t border-secondary/10 p-4">
+                <div
+                    className="
+                        fixed left-0 right-0
+                        bg-primary
+                        border-t border-secondary/10
+                        px-4 py-4
+                        z-40
+                    "
+                    style={{
+                        bottom: `${FOOTER_NAV_HEIGHT}px`,
+                        paddingBottom: "env(safe-area-inset-bottom)",
+                    }}
+                >
                     <div className="flex justify-between text-xl font-extrabold">
                         <span>Total acumulado</span>
                         <span className="text-secondary">
@@ -181,7 +197,6 @@ const OrderStatusPage = () => {
                 </div>
             )}
 
-            {/* MODAL DETALLE */}
             <AnimatePresence>
                 {selectedOrder && (
                     <motion.div
@@ -222,7 +237,6 @@ const OrderStatusPage = () => {
                                         {item.products.image_url && (
                                             <img
                                                 src={item.products.image_url}
-                                                alt={item.products.name}
                                                 className="w-12 h-12 rounded-lg object-cover"
                                             />
                                         )}

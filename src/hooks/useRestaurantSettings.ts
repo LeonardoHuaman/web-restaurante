@@ -1,4 +1,3 @@
-// src/hooks/useRestaurantSettings.ts
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 
@@ -31,12 +30,11 @@ export const useRestaurantSettings = () => {
             .on(
                 "postgres_changes",
                 {
-                    event: "*", // 👈 INSERT + UPDATE
+                    event: "*",
                     schema: "public",
                     table: "restaurant_settings",
                 },
                 () => {
-                    // 🔥 SIEMPRE vuelve a leer
                     fetchSettings();
                 }
             )

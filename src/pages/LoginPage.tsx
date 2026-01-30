@@ -1,4 +1,3 @@
-// src/pages/LoginPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
@@ -20,7 +19,6 @@ const LoginPage = () => {
 
         let email = identifier;
 
-        // 🧑‍🍳 Login por código de mozo
         if (!identifier.includes("@")) {
             const { data, error: rpcError } = await supabase.rpc(
                 "get_waiter_email",

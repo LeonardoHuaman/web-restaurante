@@ -1,4 +1,3 @@
-// src/pages/admin/ProductsTable.tsx
 import { motion } from "framer-motion";
 
 export interface Product {
@@ -29,22 +28,18 @@ const ProductsTable = ({ products, onToggleActive, onSelect }: Props) => {
             <table className="min-w-[720px] w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        {/* PRODUCTO */}
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">
                             Producto
                         </th>
 
-                        {/* CATEGORÍAS — SOLO DESKTOP */}
                         <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">
                             Categorías
                         </th>
 
-                        {/* PRECIO */}
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">
                             Precio
                         </th>
 
-                        {/* ESTADO */}
                         <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase">
                             Estado
                         </th>
@@ -66,7 +61,6 @@ const ProductsTable = ({ products, onToggleActive, onSelect }: Props) => {
                                 transition
                             "
                         >
-                            {/* PRODUCTO */}
                             <td className="px-4 py-3">
                                 <div className="flex items-center gap-3 min-w-[220px]">
                                     <img
@@ -83,7 +77,6 @@ const ProductsTable = ({ products, onToggleActive, onSelect }: Props) => {
                                         <p className="font-semibold text-gray-900 truncate">
                                             {p.name}
                                         </p>
-                                        {/* DESCRIPCIÓN SOLO DESKTOP */}
                                         <p className="hidden sm:block text-xs text-gray-500 line-clamp-1">
                                             {p.description}
                                         </p>
@@ -91,7 +84,6 @@ const ProductsTable = ({ products, onToggleActive, onSelect }: Props) => {
                                 </div>
                             </td>
 
-                            {/* CATEGORÍAS — SOLO DESKTOP */}
                             <td className="hidden sm:table-cell px-4 py-3">
                                 <div className="flex flex-wrap gap-2">
                                     {p.categories.map((cat) => (
@@ -112,12 +104,10 @@ const ProductsTable = ({ products, onToggleActive, onSelect }: Props) => {
                                 </div>
                             </td>
 
-                            {/* PRECIO */}
                             <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">
                                 S/ {p.price.toFixed(2)}
                             </td>
 
-                            {/* ESTADO */}
                             <td
                                 className="px-4 py-3 text-center"
                                 onClick={(e) => e.stopPropagation()}

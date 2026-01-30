@@ -1,4 +1,3 @@
-// src/pages/admin/AdminTablesPage.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { Users, Plus, Trash2, Printer } from "lucide-react";
@@ -130,7 +129,6 @@ const AdminTablesPage = () => {
 
     return (
         <>
-            {/* PRINT SOLO QR */}
             {qrToPrint && (
                 <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center print:flex">
                     <img src={qrToPrint} className="w-72 h-72" />
@@ -148,7 +146,6 @@ const AdminTablesPage = () => {
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* CREAR MESA */}
                     <div className="bg-white rounded-3xl p-7 shadow-lg border border-zinc-200">
                         <h3 className="font-bold text-lg mb-6 text-zinc-900">
                             Agregar mesa
@@ -190,7 +187,6 @@ const AdminTablesPage = () => {
                         </div>
                     </div>
 
-                    {/* LISTADO */}
                     <div className="lg:col-span-2">
                         <div className="flex justify-between items-center mb-5">
                             <h3 className="font-bold text-xl text-zinc-900">

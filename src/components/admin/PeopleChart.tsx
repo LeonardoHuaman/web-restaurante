@@ -29,28 +29,13 @@ export const PeopleChart: React.FC<{ data: PeopleByHour[] }> = ({
                             key={d.hour_24}
                             className="group relative flex-1 flex flex-col items-center"
                         >
-                            {/* TOOLTIP */}
-                            <div
-                                className="
-                  absolute -top-10
-                  opacity-0 group-hover:opacity-100
-                  transition
-                  pointer-events-none
-                "
-                            >
+                            <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition pointer-events-none">
                                 <div
-                                    className="
-                    bg-secondary text-primary
-                    text-xs px-3 py-1
-                    rounded-lg shadow-lg
-                    whitespace-nowrap
-                  "
+                                    className="bg-secondary text-primary text-xs px-3 py-1 rounded-lg shadow-lg whitespace-nowrap"
                                 >
                                     {d.hour_24}:00 — {d.total} personas
                                 </div>
                             </div>
-
-                            {/* BARRA */}
                             <div
                                 className="w-full bg-accent rounded-t-lg shadow-md"
                                 style={{

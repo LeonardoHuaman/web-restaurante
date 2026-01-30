@@ -1,4 +1,3 @@
-// src/pages/admin/AdminProductModal.tsx
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { Upload, X, Trash2 } from "lucide-react";
@@ -180,7 +179,6 @@ const AdminProductModal = ({ product, onClose, onSaved }: Props) => {
                     overflow-y-auto
                 "
             >
-                {/* HEADER */}
                 <div className="flex justify-between items-start gap-4">
                     <div>
                         <h2 className="text-xl sm:text-2xl font-extrabold">
@@ -212,9 +210,7 @@ const AdminProductModal = ({ product, onClose, onSaved }: Props) => {
                     </div>
                 </div>
 
-                {/* CONTENT */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* LEFT */}
                     <div className="space-y-4">
                         <div>
                             <label className="text-xs font-semibold text-gray-500">
@@ -296,7 +292,6 @@ const AdminProductModal = ({ product, onClose, onSaved }: Props) => {
                         </div>
                     </div>
 
-                    {/* RIGHT */}
                     <div
                         onClick={() =>
                             fileInputRef.current?.click()
@@ -340,7 +335,6 @@ const AdminProductModal = ({ product, onClose, onSaved }: Props) => {
                     </div>
                 </div>
 
-                {/* FOOTER */}
                 <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
                     <button
                         onClick={onClose}

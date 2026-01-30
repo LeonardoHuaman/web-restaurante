@@ -1,4 +1,3 @@
-// src/hooks/useAdminDashboardRealtime.ts
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 
@@ -20,7 +19,6 @@ export const useAdminDashboardRealtime = () => {
     });
 
     const loadStats = async () => {
-        /* mesas ocupadas */
         const { data: activeParties } = await supabase
             .from("table_parties")
             .select("table_id")
@@ -30,12 +28,10 @@ export const useAdminDashboardRealtime = () => {
             activeParties?.map(p => p.table_id)
         ).size;
 
-        /* total mesas */
         const { count: totalTables } = await supabase
             .from("tables")
             .select("id", { count: "exact", head: true });
 
-        /* pedidos activos reales */
         const { data: activeOrdersData } = await supabase
             .from("orders")
             .select("id, table_parties!inner(is_active)")
@@ -44,7 +40,6 @@ export const useAdminDashboardRealtime = () => {
 
         const activeOrders = activeOrdersData?.length ?? 0;
 
-        /* mozos (distinct real) */
         const { data: waiters } = await supabase
             .from("users")
             .select("id")

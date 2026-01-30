@@ -1,4 +1,3 @@
-// src/stores/themeStore.ts
 import { create } from "zustand";
 
 interface ThemeStore {

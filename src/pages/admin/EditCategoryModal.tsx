@@ -1,4 +1,3 @@
-// src/components/admin/EditCategoryModal.tsx  (EDITAR)
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";

@@ -1,33 +1,50 @@
+html {
+    font-size: 100%;
+}
+
 html.text-sm {
-    font-size: 500px;
+    font-size: 90%;
 }
 
 html.text-md {
-    font-size: 700px;
+    font-size: 100%;
 }
 
 html.text-lg {
-    font-size: 1000px;
+    font-size: 115%;
 }
 
 html,
 body {
-    height: 100%;
-    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    overflow-x: hidden;
 }
 
-/* ===============================
-   CSS VARIABLES
-=============================== */
 :root {
     --color-primary: #000000;
     --color-secondary: #ffffff;
     --color-accent: #e74e39;
+
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    --browser-bottom: 80px;
 }
 
-/* ===============================
-   BACKGROUNDS
-=============================== */
+.app-safe {
+    min-height: 100dvh;
+    padding-bottom: calc(var(--safe-bottom) + var(--browser-bottom));
+}
+
+@supports not (height: 100dvh) {
+    .app-safe {
+        min-height: 100vh;
+        padding-bottom: 80px;
+    }
+}
+
 .bg-primary {
     background-color: var(--color-primary);
 }
@@ -40,9 +57,6 @@ body {
     background-color: var(--color-accent);
 }
 
-/* ===============================
-   TEXT COLORS
-=============================== */
 .text-primary {
     color: var(--color-primary);
 }
@@ -55,9 +69,6 @@ body {
     color: var(--color-accent);
 }
 
-/* ===============================
-   SCROLLBAR
-=============================== */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }

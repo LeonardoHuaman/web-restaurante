@@ -1,4 +1,3 @@
-// src/hooks/useMenuProducts.ts
 import { supabase } from "../services/supabaseClient";
 
 export const loadMenuProducts = async () => {

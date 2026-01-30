@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../services/supabaseClient";
 
 export interface PeopleByHour {
-    hour_24: string; // "08".."23"
+    hour_24: string;
     total: number;
 }
 
@@ -14,7 +14,6 @@ export const usePeopleTodayByHour = () => {
     }, []);
 
     const load = async () => {
-        // horario del restaurante
         const { data: settings } = await supabase
             .from("restaurant_settings")
             .select("opening_hour, closing_hour")
@@ -24,7 +23,6 @@ export const usePeopleTodayByHour = () => {
 
         const { opening_hour, closing_hour } = settings;
 
-        // personas reales por hora
         const { data: raw } = await supabase.rpc("people_by_hour_today");
 
         const map = new Map<string, number>(

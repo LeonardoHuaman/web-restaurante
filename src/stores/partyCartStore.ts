@@ -1,4 +1,3 @@
-// src/stores/partyCartStore.ts
 import { create } from "zustand";
 import { supabase } from "../services/supabaseClient";
 
@@ -28,10 +27,6 @@ export const usePartyCartStore = create<PartyCartState>((set) => ({
 
     clearCart: () => set({ items: [] }),
 
-    /* ===============================
-       CARGAR CARRITO (FUENTE DE VERDAD)
-       TRAE IMAGEN, NOMBRE Y PRECIO
-    =============================== */
     loadCart: async (partyId) => {
         if (!partyId) return;
 
@@ -65,9 +60,6 @@ export const usePartyCartStore = create<PartyCartState>((set) => ({
         set({ items: mapped });
     },
 
-    /* ===============================
-       AGREGAR ITEM (RPC + RECARGA)
-    =============================== */
     addItem: async (partyId, productId) => {
         if (!partyId) return;
 
@@ -81,13 +73,9 @@ export const usePartyCartStore = create<PartyCartState>((set) => ({
             return;
         }
 
-        // 🔑 CLAVE: refrescar carrito inmediatamente
         await usePartyCartStore.getState().loadCart(partyId);
     },
 
-    /* ===============================
-       DISMINUIR ITEM (RPC + RECARGA)
-    =============================== */
     decreaseItem: async (partyId, productId) => {
         if (!partyId) return;
 
@@ -101,7 +89,6 @@ export const usePartyCartStore = create<PartyCartState>((set) => ({
             return;
         }
 
-        // 🔑 CLAVE: refrescar carrito inmediatamente
         await usePartyCartStore.getState().loadCart(partyId);
     },
 }));
