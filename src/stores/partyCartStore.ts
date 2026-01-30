@@ -12,25 +12,27 @@ export interface PartyCartItem {
 interface PartyCartState {
     items: PartyCartItem[];
 
-    setItems: (items: PartyCartItem[]) => void;
-    clearCart: () => void;
-
     loadCart: (partyId: string | null) => Promise<void>;
-    addItem: (partyId: string | null, productId: string) => Promise<void>;
+    optimisticAdd: (product: PartyCartItem) => void;
+    optimisticDecrease: (productId: string) => void;
+
+    addItem: (partyId: string | null, product: PartyCartItem) => Promise<void>;
     decreaseItem: (partyId: string | null, productId: string) => Promise<void>;
 }
 
-export const usePartyCartStore = create<PartyCartState>((set) => ({
+export const usePartyCartStore = create<PartyCartState>((set, get) => ({
     items: [],
 
-    setItems: (items) => set({ items }),
-
-    clearCart: () => set({ items: [] }),
-
+    /* =======================
+       LOAD (solo realtime / init)
+    ======================= */
     loadCart: async (partyId) => {
-        if (!partyId) return;
+        if (!partyId) {
+            set({ items: [] });
+            return;
+        }
 
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from("party_cart_items")
             .select(`
                 product_id,
@@ -43,41 +45,81 @@ export const usePartyCartStore = create<PartyCartState>((set) => ({
             `)
             .eq("party_id", partyId);
 
-        if (error) {
-            console.error("Error loading cart:", error.message);
+        if (!data || data.length === 0) {
+            set({ items: [] });
             return;
         }
 
-        const mapped: PartyCartItem[] =
-            data?.map((row: any) => ({
-                product_id: row.product_id,
-                quantity: row.quantity,
-                name: row.product.name,
-                price: row.product.price,
-                image_url: row.product.image_url,
-            })) || [];
-
-        set({ items: mapped });
+        set({
+            items: data.map((r: any) => ({
+                product_id: r.product_id,
+                quantity: r.quantity,
+                name: r.product.name,
+                price: r.product.price,
+                image_url: r.product.image_url,
+            })),
+        });
     },
 
-    addItem: async (partyId, productId) => {
+    /* =======================
+       OPTIMISTIC UI
+    ======================= */
+    optimisticAdd: (product) =>
+        set((state) => {
+            const existing = state.items.find(
+                (i) => i.product_id === product.product_id
+            );
+
+            if (existing) {
+                return {
+                    items: state.items.map((i) =>
+                        i.product_id === product.product_id
+                            ? { ...i, quantity: i.quantity + 1 }
+                            : i
+                    ),
+                };
+            }
+
+            return {
+                items: [...state.items, { ...product, quantity: 1 }],
+            };
+        }),
+
+    optimisticDecrease: (productId) =>
+        set((state) => ({
+            items: state.items
+                .map((i) =>
+                    i.product_id === productId
+                        ? { ...i, quantity: i.quantity - 1 }
+                        : i
+                )
+                .filter((i) => i.quantity > 0),
+        })),
+
+    /* =======================
+       BACKEND (NO loadCart)
+    ======================= */
+    addItem: async (partyId, product) => {
         if (!partyId) return;
+
+        get().optimisticAdd(product);
 
         const { error } = await supabase.rpc("party_cart_add", {
             p_party_id: partyId,
-            p_product_id: productId,
+            p_product_id: product.product_id,
         });
 
         if (error) {
-            console.error("RPC party_cart_add failed:", error.message);
-            return;
+            console.error(error);
+            // fallback: recargar desde DB
+            await get().loadCart(partyId);
         }
-
-        await usePartyCartStore.getState().loadCart(partyId);
     },
 
     decreaseItem: async (partyId, productId) => {
         if (!partyId) return;
+
+        get().optimisticDecrease(productId);
 
         const { error } = await supabase.rpc("party_cart_decrease", {
             p_party_id: partyId,
@@ -85,10 +127,8 @@ export const usePartyCartStore = create<PartyCartState>((set) => ({
         });
 
         if (error) {
-            console.error("RPC party_cart_decrease failed:", error.message);
-            return;
+            console.error(error);
+            await get().loadCart(partyId);
         }
-
-        await usePartyCartStore.getState().loadCart(partyId);
     },
 }));

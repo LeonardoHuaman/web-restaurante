@@ -63,8 +63,15 @@ const ProductCard = ({ product }: Props) => {
                             disabled={!partyId}
                             onClick={() =>
                                 partyId &&
-                                addItem(partyId, product.id)
+                                addItem(partyId, {
+                                    product_id: product.id,
+                                    name: product.name,
+                                    price: product.price,
+                                    image_url: product.image_url,
+                                    quantity: 1,
+                                })
                             }
+
                             className={`w-8 h-8 rounded-full flex items-center justify-center ${partyId
                                 ? "bg-accent text-secondary"
                                 : "bg-accent/30 text-secondary/60 cursor-not-allowed"
