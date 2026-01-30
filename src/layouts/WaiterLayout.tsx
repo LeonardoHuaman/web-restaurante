@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import WaiterTopNav from "../components/waiter/WaiterTopNav";
 import FooterNav from "../shared/components/FooterNav";
-import WaiterSafeWrapper from "../components/layout/WaiterSafeWrapper";
+import WaiterSafeWrapper from "./WaiterSafeWrapper";
 
 const WaiterLayout = () => {
     return (
