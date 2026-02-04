@@ -1,3 +1,6 @@
+/* =========================
+   BASE FONT SCALE
+========================= */
 html {
     font-size: 100%;
 }
@@ -14,25 +17,52 @@ html.text-lg {
     font-size: 115%;
 }
 
+/* =========================
+   RESET + VIEWPORT
+========================= */
 html,
 body {
     margin: 0;
     padding: 0;
     min-height: 100%;
     overflow-x: hidden;
+    background-color: #f9fafb;
 }
 
+/* =========================
+   ROOT VARIABLES
+========================= */
 :root {
+    /* Brand */
     --color-primary: #000000;
     --color-secondary: #ffffff;
     --color-accent: #e74e39;
 
+    /* Status */
+    --red: #ef4444;
+    --red-soft: #fee2e2;
+
+    --orange: #f59e0b;
+    --orange-soft: #fef3c7;
+
+    --green: #22c55e;
+    --green-soft: #dcfce7;
+
+    /* UI */
+    --card: #ffffff;
+    --border: #e5e7eb;
+
+    /* Safe areas */
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
 
+    /* Mobile browser bottom bar (Android / iOS) */
     --browser-bottom: 80px;
 }
 
+/* =========================
+   SAFE APP CONTAINER
+========================= */
 .app-safe {
     min-height: 100dvh;
     padding-bottom: calc(var(--safe-bottom) + var(--browser-bottom));
@@ -41,10 +71,13 @@ body {
 @supports not (height: 100dvh) {
     .app-safe {
         min-height: 100vh;
-        padding-bottom: 80px;
+        padding-bottom: var(--browser-bottom);
     }
 }
 
+/* =========================
+   COLOR UTILITIES
+========================= */
 .bg-primary {
     background-color: var(--color-primary);
 }
@@ -69,6 +102,9 @@ body {
     color: var(--color-accent);
 }
 
+/* =========================
+   SCROLL UTILITIES
+========================= */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
@@ -78,6 +114,61 @@ body {
     scrollbar-width: none;
 }
 
+/* Global scroll style (desktop + tablet) */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* =========================
+   KITCHEN – CRITICAL ANIMATION
+========================= */
+@keyframes softPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.animate-critical {
+    animation: softPulse 2s infinite;
+}
+
+/* =========================
+   KITCHEN – UX HELPERS
+========================= */
+
+/* Cards compactas en móvil */
+@media (max-width: 640px) {
+    .kitchen-card {
+        border-radius: 14px;
+    }
+}
+
+/* Botones táctiles grandes */
+.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* =========================
+   PRINT MODE
+========================= */
 @media print {
     body * {
         visibility: hidden;

@@ -15,7 +15,7 @@ const TOTAL_BAR_HEIGHT = 80;
 
 interface Order {
     id: string;
-    status: "generado" | "en_curso" | "finalizado";
+    status: "generado" | "en_proceso" | "listo";
     total: number;
     created_at: string;
 }
@@ -30,18 +30,25 @@ interface OrderItem {
     };
 }
 
-const statusConfig = {
+const statusConfig: Record<
+    Order["status"],
+    {
+        label: string;
+        icon: any;
+        color: string;
+    }
+> = {
     generado: {
         label: "Generado",
         icon: Clock,
         color: "text-emerald-600",
     },
-    en_curso: {
+    en_proceso: {
         label: "En curso",
         icon: Loader2,
         color: "text-orange-500",
     },
-    finalizado: {
+    listo: {
         label: "Entregado",
         icon: CheckCircle2,
         color: "text-sky-600",
@@ -64,7 +71,7 @@ const OrderStatusPage = () => {
                 .eq("party_id", partyId)
                 .order("created_at", { ascending: true });
 
-            setOrders(data || []);
+            setOrders((data as Order[]) || []);
         };
 
         fetchOrders();
@@ -95,22 +102,26 @@ const OrderStatusPage = () => {
 
         const { data } = await supabase
             .from("order_items")
-            .select(`
-                product_id,
-                quantity,
-                price,
-                products (
-                    name,
-                    image_url
-                )
-            `)
+            .select(
+                `
+        product_id,
+        quantity,
+        price,
+        products (
+          name,
+          image_url
+        )
+      `
+            )
             .eq("order_id", order.id);
 
         if (!data) return;
 
         setOrderItems(
             data.map((item: any) => ({
-                ...item,
+                product_id: item.product_id,
+                quantity: item.quantity,
+                price: item.price,
                 products: Array.isArray(item.products)
                     ? item.products[0]
                     : item.products,
@@ -140,11 +151,11 @@ const OrderStatusPage = () => {
                             onClick={() => openOrder(order)}
                             whileTap={{ scale: 0.97 }}
                             className="
-                                w-full text-left
-                                bg-secondary text-primary
-                                rounded-2xl
-                                p-5 shadow-md
-                            "
+                w-full text-left
+                bg-secondary text-primary
+                rounded-2xl
+                p-5 shadow-md
+              "
                         >
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-3">
@@ -155,7 +166,7 @@ const OrderStatusPage = () => {
                                 </div>
 
                                 <span className="text-lg font-bold">
-                                    S/ {order.total}
+                                    S/ {order.total.toFixed(2)}
                                 </span>
                             </div>
 
@@ -177,12 +188,12 @@ const OrderStatusPage = () => {
             {orders.length > 0 && (
                 <div
                     className="
-                        fixed left-0 right-0
-                        bg-primary
-                        border-t border-secondary/10
-                        px-4 py-4
-                        z-40
-                    "
+            fixed left-0 right-0
+            bg-primary
+            border-t border-secondary/10
+            px-4 py-4
+            z-40
+          "
                     style={{
                         bottom: `${FOOTER_NAV_HEIGHT}px`,
                         paddingBottom: "env(safe-area-inset-bottom)",
@@ -191,7 +202,7 @@ const OrderStatusPage = () => {
                     <div className="flex justify-between text-xl font-extrabold">
                         <span>Total acumulado</span>
                         <span className="text-secondary">
-                            S/ {totalParty}
+                            S/ {totalParty.toFixed(2)}
                         </span>
                     </div>
                 </div>
@@ -210,11 +221,11 @@ const OrderStatusPage = () => {
                             animate={{ y: 0 }}
                             exit={{ y: 80 }}
                             className="
-                                bg-secondary text-primary
-                                w-full rounded-t-2xl
-                                p-5 max-h-[85vh]
-                                overflow-y-auto
-                            "
+                bg-secondary text-primary
+                w-full rounded-t-2xl
+                p-5 max-h-[85vh]
+                overflow-y-auto
+              "
                         >
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-bold">
@@ -229,9 +240,9 @@ const OrderStatusPage = () => {
                             </div>
 
                             <div className="space-y-3">
-                                {orderItems.map((item) => (
+                                {orderItems.map((item, idx) => (
                                     <div
-                                        key={item.product_id}
+                                        key={`${item.product_id}-${idx}`}
                                         className="flex items-center gap-3"
                                     >
                                         {item.products.image_url && (
@@ -246,12 +257,12 @@ const OrderStatusPage = () => {
                                                 {item.products.name}
                                             </div>
                                             <div className="text-primary/60 text-sm">
-                                                {item.quantity} × S/ {item.price}
+                                                {item.quantity} × S/ {item.price.toFixed(2)}
                                             </div>
                                         </div>
 
                                         <div className="font-semibold">
-                                            S/ {item.quantity * item.price}
+                                            S/ {(item.quantity * item.price).toFixed(2)}
                                         </div>
                                     </div>
                                 ))}
@@ -260,7 +271,7 @@ const OrderStatusPage = () => {
                             <div className="flex justify-between font-bold text-lg mt-5">
                                 <span>Total</span>
                                 <span className="text-primary">
-                                    S/ {selectedOrder.total}
+                                    S/ {selectedOrder.total.toFixed(2)}
                                 </span>
                             </div>
                         </motion.div>

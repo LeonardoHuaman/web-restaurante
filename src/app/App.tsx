@@ -7,6 +7,7 @@ import OrderStatusPage from "../pages/OrderStatusPage";
 import LoginPage from "../pages/LoginPage";
 import AdminGuard from "../features/auth/guards/AdminGuard";
 import WaiterGuard from "../features/auth/guards/WaiterGuard";
+import KitchenGuard from "../features/auth/guards/KitchenGuard";
 import AdminLayout from "../layouts/AdminLayout";
 import WaiterLayout from "../layouts/WaiterLayout";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
@@ -19,6 +20,9 @@ import WaiterPartyDetailPage from "../pages/waiter/WaiterPartyDetailPage";
 import WaiterMyTablesPage from "../pages/waiter/WaiterMyTablesPage";
 import { useLoadPartyCart } from "../features/orders/hooks/useLoadPartyCart";
 import RestaurantSettingsPage from "../pages/admin/RestaurantSettingsPage";
+import KitchenLayout from "../layouts/KitchenLayout";
+import KitchenPage from "../pages/kitchen/KitchenPage";
+import KitchenStockPage from "../pages/kitchen/KitchenStockPage";
 
 const InvalidTable = () => (
   <div className="h-screen flex items-center justify-center bg-primary text-secondary">
@@ -32,6 +36,8 @@ function App() {
   return (
     <div className="min-h-screen bg-primary text-secondary transition-colors duration-300">
       <Routes>
+
+        {/* ===== CLIENTE (MESAS) ===== */}
         <Route
           element={
             <TableProvider>
@@ -46,8 +52,9 @@ function App() {
         </Route>
 
         <Route path="invalid-table" element={<InvalidTable />} />
-
         <Route path="login" element={<LoginPage />} />
+
+        {/* ===== ADMIN ===== */}
         <Route
           path="admin"
           element={
@@ -64,6 +71,7 @@ function App() {
           <Route path="configuracion" element={<RestaurantSettingsPage />} />
         </Route>
 
+        {/* ===== MOZOS ===== */}
         <Route
           path="waiter"
           element={
@@ -76,6 +84,20 @@ function App() {
           <Route path="my-tables" element={<WaiterMyTablesPage />} />
           <Route path="party/:partyId" element={<WaiterPartyDetailPage />} />
         </Route>
+
+        {/* ===== COCINA (🔒 PROTEGIDO) ===== */}
+        <Route
+          path="cocina"
+          element={
+            <KitchenGuard>
+              <KitchenLayout />
+            </KitchenGuard>
+          }
+        >
+          <Route index element={<KitchenPage />} />
+          <Route path="stock" element={<KitchenStockPage />} />
+        </Route>
+
       </Routes>
     </div>
   );

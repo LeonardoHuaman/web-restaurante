@@ -1,15 +1,21 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../../services/supabaseClient";
-import { Clock, Loader2, CheckCircle2 } from "lucide-react";
+import {
+    Clock,
+    Loader2,
+    CheckCircle2,
+    type LucideIcon,
+} from "lucide-react";
 
-type OrderStatus = "generado" | "en_curso" | "finalizado";
+type OrderStatus = "generado" | "en_proceso" | "listo" | "finalizado";
 
 interface OrderItem {
     quantity: number;
     price: number;
     products: {
         name: string;
+        image_url?: string;
     };
 }
 
@@ -23,19 +29,22 @@ interface Order {
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
     generado: "Generado",
-    en_curso: "En curso",
+    en_proceso: "En proceso",
+    listo: "Listo",
     finalizado: "Finalizado",
 };
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
-    generado: "bg-green-200 text-green-800",
-    en_curso: "bg-orange-200 text-orange-800",
-    finalizado: "bg-red-200 text-red-800",
+    generado: "bg-gray-200 text-gray-800",
+    en_proceso: "bg-orange-200 text-orange-800",
+    listo: "bg-green-200 text-green-800",
+    finalizado: "bg-blue-200 text-blue-800",
 };
 
-const STATUS_ICON: Record<OrderStatus, any> = {
+const STATUS_ICON: Record<OrderStatus, LucideIcon> = {
     generado: Clock,
-    en_curso: Loader2,
+    en_proceso: Loader2,
+    listo: CheckCircle2,
     finalizado: CheckCircle2,
 };
 
@@ -50,27 +59,30 @@ const WaiterPartyDetailPage = () => {
     const from = location.state?.from;
 
     const goBack = () => {
-        if (from === "mine") navigate("/waiter/my-tables");
-        else navigate("/waiter");
+        navigate(from === "mine" ? "/waiter/my-tables" : "/waiter");
     };
+
     const fetchOrders = async () => {
         if (!partyId) return;
 
         const { data, error } = await supabase
             .from("table_parties")
             .select(`
-        orders (
-          id,
-          status,
-          total,
-          created_at,
-          order_items (
-            quantity,
-            price,
-            products ( name )
-          )
-        )
-      `)
+                orders (
+                    id,
+                    status,
+                    total,
+                    created_at,
+                    order_items (
+                        quantity,
+                        price,
+                        products (
+                            name,
+                            image_url
+                        )
+                    )
+                )
+            `)
             .eq("id", partyId)
             .single();
 
@@ -124,30 +136,17 @@ const WaiterPartyDetailPage = () => {
     const globalStatus: OrderStatus | null = useMemo(() => {
         if (orders.length === 0) return null;
 
-        if (orders.every((o) => o.status === "generado"))
-            return "generado";
-
-        if (orders.some((o) => o.status === "en_curso"))
-            return "en_curso";
-
         if (orders.every((o) => o.status === "finalizado"))
             return "finalizado";
 
-        return "en_curso";
+        if (orders.some((o) => o.status === "en_proceso"))
+            return "en_proceso";
+
+        if (orders.some((o) => o.status === "listo"))
+            return "listo";
+
+        return "generado";
     }, [orders]);
-
-    const GlobalIcon =
-        globalStatus !== null ? STATUS_ICON[globalStatus] : null;
-
-    const updateStatus = async (
-        orderId: string,
-        newStatus: OrderStatus
-    ) => {
-        await supabase
-            .from("orders")
-            .update({ status: newStatus })
-            .eq("id", orderId);
-    };
 
     if (loading) {
         return (
@@ -171,19 +170,22 @@ const WaiterPartyDetailPage = () => {
                     Detalle de la mesa
                 </h1>
 
-                {globalStatus && (
-                    <span
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold ${STATUS_STYLE[globalStatus]}`}
-                    >
-                        <GlobalIcon className="w-4 h-4" />
-                        {STATUS_LABEL[globalStatus]}
-                    </span>
-                )}
+                {globalStatus && (() => {
+                    const Icon = STATUS_ICON[globalStatus];
+                    return (
+                        <span
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold ${STATUS_STYLE[globalStatus]}`}
+                        >
+                            <Icon className="w-4 h-4" />
+                            {STATUS_LABEL[globalStatus]}
+                        </span>
+                    );
+                })()}
             </div>
 
             {orderedOrders.length === 0 && (
                 <p className="text-secondary/60">
-                    No hay pedidos aún 🍽️
+                    No hay pedidos aún
                 </p>
             )}
 
@@ -209,55 +211,33 @@ const WaiterPartyDetailPage = () => {
                                 </span>
                             </div>
 
-                            <div className="space-y-2 mb-4">
+                            <div className="space-y-3 mb-4">
                                 {order.order_items.map((item, i) => (
                                     <div
                                         key={i}
-                                        className="flex justify-between text-sm"
+                                        className="flex items-center gap-3 text-sm"
                                     >
-                                        <span>
-                                            {item.quantity} × {item.products.name}
-                                        </span>
-                                        <span>
-                                            S/ {item.price * item.quantity}
-                                        </span>
+                                        {item.products.image_url && (
+                                            <img
+                                                src={item.products.image_url}
+                                                className="w-12 h-12 rounded-lg object-cover"
+                                            />
+                                        )}
+
+                                        <div className="flex-1">
+                                            <div className="font-medium">
+                                                {item.products.name}
+                                            </div>
+                                            <div className="text-primary/60">
+                                                {item.quantity} × S/ {item.price}
+                                            </div>
+                                        </div>
+
+                                        <div className="font-semibold">
+                                            S/ {item.quantity * item.price}
+                                        </div>
                                     </div>
                                 ))}
-                            </div>
-
-                            <div className="flex gap-3 mb-3">
-                                {order.status !== "generado" && (
-                                    <button
-                                        onClick={() =>
-                                            updateStatus(order.id, "generado")
-                                        }
-                                        className="px-3 py-1 text-sm rounded border hover:bg-green-100"
-                                    >
-                                        Generado
-                                    </button>
-                                )}
-
-                                {order.status !== "en_curso" && (
-                                    <button
-                                        onClick={() =>
-                                            updateStatus(order.id, "en_curso")
-                                        }
-                                        className="px-3 py-1 text-sm rounded border hover:bg-orange-100"
-                                    >
-                                        En curso
-                                    </button>
-                                )}
-
-                                {order.status !== "finalizado" && (
-                                    <button
-                                        onClick={() =>
-                                            updateStatus(order.id, "finalizado")
-                                        }
-                                        className="px-3 py-1 text-sm rounded border hover:bg-red-100"
-                                    >
-                                        Finalizado
-                                    </button>
-                                )}
                             </div>
 
                             <div className="text-right font-semibold">

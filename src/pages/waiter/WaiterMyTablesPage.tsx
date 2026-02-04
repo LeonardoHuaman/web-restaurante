@@ -6,9 +6,14 @@ import {
     Clock,
     Loader2,
     CheckCircle2,
+    type LucideIcon,
 } from "lucide-react";
 
-type OrderStatus = "generado" | "en_curso" | "finalizado";
+type OrderStatus =
+    | "generado"
+    | "en_proceso"
+    | "listo"
+    | "finalizado";
 
 interface Order {
     status: OrderStatus;
@@ -17,52 +22,73 @@ interface Order {
 
 interface Party {
     id: string;
-    tables: { table_number: number };
+    table_number: number;
     orders: Order[];
 }
 
 const STATUS_CONFIG: Record<
     OrderStatus,
-    { label: string; icon: any; badge: string }
+    { label: string; icon: LucideIcon; badge: string }
 > = {
     generado: {
         label: "Generado",
         icon: Clock,
-        badge: "bg-green-200 text-green-800",
+        badge: "bg-gray-200 text-gray-800",
     },
-    en_curso: {
-        label: "En curso",
+    en_proceso: {
+        label: "En proceso",
         icon: Loader2,
         badge: "bg-orange-200 text-orange-800",
+    },
+    listo: {
+        label: "Listo",
+        icon: CheckCircle2,
+        badge: "bg-green-200 text-green-800",
     },
     finalizado: {
         label: "Finalizado",
         icon: CheckCircle2,
-        badge: "bg-red-200 text-red-800",
+        badge: "bg-blue-200 text-blue-800",
     },
 };
 
 const WaiterMyTablesPage = () => {
     const [parties, setParties] = useState<Party[]>([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     const fetchMyTables = async () => {
         const {
             data: { user },
         } = await supabase.auth.getUser();
+
         if (!user) return;
 
         const { data } = await supabase
             .from("table_parties")
             .select(`
-        id,
-        tables!inner(table_number),
-        orders(status, total)
-      `)
+                id,
+                tables!inner(table_number),
+                orders(status, total)
+            `)
             .eq("waiter_id", user.id)
             .eq("is_active", true);
 
-        setParties((data as any[]) ?? []);
+        if (!data) {
+            setParties([]);
+            setLoading(false);
+            return;
+        }
+
+        // 🔥 Normalizamos la respuesta de Supabase
+        const normalized: Party[] = data.map((p: any) => ({
+            id: p.id,
+            table_number: p.tables[0]?.table_number,
+            orders: p.orders ?? [],
+        }));
+
+        setParties(normalized);
+        setLoading(false);
     };
 
     const finalizeParty = async (
@@ -72,7 +98,7 @@ const WaiterMyTablesPage = () => {
         e.stopPropagation();
 
         const ok = window.confirm(
-            "¿Finalizar esta mesa? Se cerrarán todas las sesiones activas."
+            "¿Finalizar esta mesa? Se cerrarán los pedidos y las sesiones activas."
         );
         if (!ok) return;
 
@@ -106,6 +132,14 @@ const WaiterMyTablesPage = () => {
         };
     }, []);
 
+    if (loading) {
+        return (
+            <div className="bg-primary text-secondary min-h-full p-6">
+                Cargando mesas...
+            </div>
+        );
+    }
+
     return (
         <div className="bg-primary text-secondary min-h-full p-6">
             <h1 className="text-3xl font-extrabold mb-6">
@@ -114,7 +148,7 @@ const WaiterMyTablesPage = () => {
 
             {parties.length === 0 && (
                 <p className="text-secondary/60">
-                    No tienes mesas activas 🍽️
+                    No tienes mesas activas
                 </p>
             )}
 
@@ -137,7 +171,7 @@ const WaiterMyTablesPage = () => {
                         >
                             <div className="flex justify-between items-center mb-2">
                                 <h2 className="text-xl font-bold">
-                                    Mesa {party.tables.table_number}
+                                    Mesa {party.table_number}
                                 </h2>
 
                                 <div className="flex items-center gap-2 text-sm">
@@ -152,7 +186,8 @@ const WaiterMyTablesPage = () => {
 
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {party.orders.map((order, i) => {
-                                    const cfg = STATUS_CONFIG[order.status];
+                                    const cfg =
+                                        STATUS_CONFIG[order.status];
                                     const Icon = cfg.icon;
 
                                     return (

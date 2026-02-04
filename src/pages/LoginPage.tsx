@@ -4,7 +4,7 @@ import { supabase } from "../services/supabaseClient";
 
 type UserWithRole = {
     role: {
-        name: "admin" | "mozo";
+        name: "admin" | "mozo" | "cocinero";
     };
 };
 
@@ -19,20 +19,30 @@ const LoginPage = () => {
 
         let email = identifier;
 
+        /**
+         * ============================
+         * 1. SI NO ES EMAIL → ES CÓDIGO
+         * ============================
+         */
         if (!identifier.includes("@")) {
             const { data, error: rpcError } = await supabase.rpc(
-                "get_waiter_email",
+                "get_user_email_by_code",
                 { p_codigo: identifier }
             );
 
             if (rpcError || !data) {
-                setError("Código de mozo inválido");
+                setError("Código inválido");
                 return;
             }
 
             email = data;
         }
 
+        /**
+         * ============================
+         * 2. LOGIN CON SUPABASE AUTH
+         * ============================
+         */
         const { error: loginError } =
             await supabase.auth.signInWithPassword({
                 email,
@@ -44,6 +54,11 @@ const LoginPage = () => {
             return;
         }
 
+        /**
+         * ============================
+         * 3. OBTENER SESIÓN
+         * ============================
+         */
         const {
             data: { session },
         } = await supabase.auth.getSession();
@@ -53,6 +68,11 @@ const LoginPage = () => {
             return;
         }
 
+        /**
+         * ============================
+         * 4. OBTENER ROL DESDE DB
+         * ============================
+         */
         const { data: profile, error: profileError } = await supabase
             .from("users")
             .select("role:role_id(name)")
@@ -64,11 +84,22 @@ const LoginPage = () => {
             return;
         }
 
+        /**
+         * ============================
+         * 5. REDIRECCIÓN POR ROL
+         * ============================
+         */
         const role = profile.role.name;
 
-        if (role === "admin") navigate("/admin");
-        else if (role === "mozo") navigate("/waiter");
-        else setError("Rol no autorizado");
+        if (role === "admin") {
+            navigate("/admin");
+        } else if (role === "mozo") {
+            navigate("/waiter");
+        } else if (role === "cocinero") {
+            navigate("/cocina");
+        } else {
+            setError("Rol no autorizado");
+        }
     };
 
     return (
@@ -81,14 +112,14 @@ const LoginPage = () => {
                 <div className="space-y-4">
                     <input
                         className="
-              w-full p-3 rounded-lg
-              border border-primary/20
-              bg-secondary
-              text-primary
-              placeholder:text-primary/50
-              focus:outline-none focus:ring-2 focus:ring-accent
-            "
-                        placeholder="Email (admin) o código de mozo"
+                            w-full p-3 rounded-lg
+                            border border-primary/20
+                            bg-secondary
+                            text-primary
+                            placeholder:text-primary/50
+                            focus:outline-none focus:ring-2 focus:ring-accent
+                        "
+                        placeholder="Email o código (MZ001 / CK001)"
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
                     />
@@ -96,13 +127,13 @@ const LoginPage = () => {
                     <input
                         type="password"
                         className="
-              w-full p-3 rounded-lg
-              border border-primary/20
-              bg-secondary
-              text-primary
-              placeholder:text-primary/50
-              focus:outline-none focus:ring-2 focus:ring-accent
-            "
+                            w-full p-3 rounded-lg
+                            border border-primary/20
+                            bg-secondary
+                            text-primary
+                            placeholder:text-primary/50
+                            focus:outline-none focus:ring-2 focus:ring-accent
+                        "
                         placeholder="Contraseña"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -117,13 +148,13 @@ const LoginPage = () => {
                     <button
                         onClick={login}
                         className="
-              w-full py-3 rounded-lg
-              font-semibold
-              bg-accent
-              text-secondary
-              hover:brightness-110
-              transition
-            "
+                            w-full py-3 rounded-lg
+                            font-semibold
+                            bg-accent
+                            text-secondary
+                            hover:brightness-110
+                            transition
+                        "
                     >
                         Entrar
                     </button>

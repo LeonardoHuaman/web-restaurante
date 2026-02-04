@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 
-type Role = "admin" | "mozo";
+type Role = "admin" | "mozo" | "cocinero" | "cliente";
 
 type AuthState = {
     loading: boolean;
@@ -65,17 +65,13 @@ export const AuthProvider = ({
 
         loadSession();
 
-        const { data: listener } = supabase.auth.onAuthStateChange(
-            () => {
-                loadSession();
-            }
-        );
+        const { data: listener } = supabase.auth.onAuthStateChange(() => {
+            loadSession();
+        });
 
         return () => {
             mounted = false;
-            if (listener?.subscription) {
-                listener.subscription.unsubscribe();
-            }
+            listener?.subscription?.unsubscribe();
         };
     }, []);
 
